@@ -90,6 +90,13 @@
                     <i class="fa-solid fa-moon"></i> <span data-i18n="tab_dream">Fassarar Mafarki</span>
                 </button>
             </nav>
+            <div id="keyBanner" class="hidden bg-amber-50 border-b border-amber-200 p-3 text-xs text-gray-800">
+                <p class="mb-2" data-i18n="banner_text"></p>
+                <div class="flex gap-2">
+                    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="flex-1 text-center bg-blue-600 text-white rounded py-2 font-semibold" data-i18n="banner_get"></a>
+                    <button onclick="openSettingsModal()" class="flex-1 bg-tealHeader text-white rounded py-2 font-semibold" data-i18n="banner_enter"></button>
+                </div>
+            </div>
 
             <!-- TAB 1: GEOMANCY SPREAD & SHIELD CHART -->
             <section id="tabSpread" class="p-4 block">
@@ -272,6 +279,19 @@
         <div class="bg-white rounded-lg p-5 w-full max-w-md shadow-2xl">
             <h3 class="text-lg font-bold text-gray-800 mb-2"><span data-i18n="set_title">Saitin Gemini API Key</span></h3>
             <p class="text-xs text-gray-600 mb-4"><span data-i18n="set_desc">Shigar da API Key dinka na Google Gemini don cin gajiyar fassara ta hanyar AI.</span></p>
+            <div class="bg-teal-50 border border-teal-200 rounded p-3 mb-4 text-xs text-gray-700">
+                <b data-i18n="key_guide_title">Yadda ake …</b>
+                <ol class="list-decimal ps-5 mt-1 space-y-1">
+                    <li><span data-i18n="key_s1"></span><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="block mt-1 text-center bg-blue-600 text-white rounded py-2 font-semibold" data-i18n="get_key_btn"></a></li>
+                    <li data-i18n="key_s2"></li>
+                    <li data-i18n="key_s3"></li>
+                    <li data-i18n="key_s4"></li>
+                    <li data-i18n="key_s5"></li>
+                </ol>
+                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="block text-center mt-2 bg-blue-600 text-white rounded py-2 text-xs font-semibold"><i class="fa-brands fa-google"></i> <span data-i18n="open_google"></span></a>
+                <button id="keyVideoBtn" onclick="openKeyVideo()" class="hidden mt-2 w-full bg-tealHeader text-white rounded py-2 text-xs font-semibold"><i class="fa-solid fa-circle-play"></i> <span data-i18n="watch_video"></span></button>
+                <p class="mt-2 text-gray-500" data-i18n="key_note"></p>
+            </div>
             <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." 
                 class="w-full text-sm p-2.5 border border-gray-300 rounded mb-4 focus:ring-2 focus:ring-tealHeader focus:outline-none">
             <div class="flex justify-end gap-2">
@@ -287,6 +307,14 @@
         <div class="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto p-3">
             <div class="flex justify-between items-center mb-2"><b class="text-sm"><span data-i18n="names_title">Sunayen Taurari 16</span></b><button onclick="closeNamesModal()" class="text-gray-500 px-2">✕</button></div>
             <div id="namesList" class="text-xs"></div>
+        </div>
+    </div>
+
+    <!-- Bidiyon koyarwa -->
+    <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-[60] p-3">
+        <div class="bg-white rounded-lg w-full max-w-lg p-3">
+            <div class="flex justify-between items-center mb-2"><b class="text-sm" data-i18n="video_title"></b><button onclick="closeKeyVideo()" class="text-gray-500 px-2">✕</button></div>
+            <div id="videoBox"></div>
         </div>
     </div>
 
@@ -321,7 +349,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy Spread", "ar": "طالعك في علم الرمل"}, "title_analysis": {"ha": "Fassarar Gidaje & Magani", "en": "House Reading & Remedies", "ar": "تفسير البيوت والعلاج"}, "title_dream": {"ha": "Fassarar Mafarki", "en": "Dream Interpretation", "ar": "تفسير الأحلام"}, "tab_spread": {"ha": "Ramli", "en": "Raml", "ar": "الرمل"}, "tab_analysis": {"ha": "Fassara & Magani", "en": "Reading & Remedies", "ar": "التفسير والعلاج"}, "tab_dream": {"ha": "Fassarar Mafarki", "en": "Dreams", "ar": "الأحلام"}, "question_label": {"ha": "Tambayarka (Question):", "en": "Your question:", "ar": "سؤالك:"}, "mothers_title": {"ha": "Shigar da Uwaye (M1 - M4 Hagu zuwa Dama)", "en": "Enter the Mothers (M1–M4, left to right)", "ar": "أدخل الأمهات (م1 – م4 من اليسار إلى اليمين)"}, "auto": {"ha": "Zuba Ramli (Auto)", "en": "Cast Raml (Auto)", "ar": "اضرب الرمل (تلقائي)"}, "tap_hint": {"ha": "Latsa kowane layi don sauya tsakanin Digo 1 (●) ko Digo 2 (● ●):", "en": "Tap a line to switch between 1 dot (●) and 2 dots (● ●):", "ar": "اضغط على السطر للتبديل بين نقطة واحدة (●) ونقطتين (● ●):"}, "m1": {"ha": "M1 (Gida 1)", "en": "M1 (House 1)", "ar": "م1 (البيت 1)"}, "m2": {"ha": "M2 (Gida 2)", "en": "M2 (House 2)", "ar": "م2 (البيت 2)"}, "m3": {"ha": "M3 (Gida 3)", "en": "M3 (House 3)", "ar": "م3 (البيت 3)"}, "m4": {"ha": "M4 (Gida 4)", "en": "M4 (House 4)", "ar": "م4 (البيت 4)"}, "total": {"ha": "Total Points", "en": "Total Points", "ar": "مجموع النقاط"}, "analyze_btn": {"ha": "Fassara Wannan Taurari da Magani (Gemini AI)", "en": "Interpret this chart with remedies (Gemini AI)", "ar": "فسّر هذا الطالع مع العلاج (Gemini AI)"}, "analysis_title": {"ha": "Binciken Ilmin Ramli & Magani", "en": "Raml Analysis & Remedies", "ar": "تحليل علم الرمل والعلاج"}, "analysis_sub": {"ha": "Gidaje 16, Taurari, Matsaloli da Magani", "en": "16 houses, figures, problems and remedies", "ar": "البيوت الستة عشر والأشكال والمشكلات والعلاج"}, "reinterpret": {"ha": "Sake Fassara", "en": "Re-interpret", "ar": "إعادة التفسير"}, "loading1": {"ha": "Masani na AI yana nazarin gidaje 16 da haruffan taurari...", "en": "The AI is studying the 16 houses and figures...", "ar": "يدرس الذكاء الاصطناعي البيوت الستة عشر والأشكال..."}, "loading2": {"ha": "Ana duba magani da addu'o'i dace...", "en": "Finding suitable remedies and supplications...", "ar": "يجري البحث عن العلاج والأدعية المناسبة..."}, "analysis_empty": {"ha": "Latsa \"Fassara Wannan Taurari\" don samun cikakken bayani akan gidaje 16, gwanintarsu, matsaloli, da magani mai amfani.", "en": "Tap “Interpret this chart” to get a full reading of the 16 houses, their strengths, problems and practical remedies.", "ar": "اضغط «فسّر هذا الطالع» للحصول على تفسير كامل للبيوت الستة عشر وقوتها ومشكلاتها والعلاج المناسب."}, "dream_title": {"ha": "Fassarar Mafarki a Musulunci", "en": "Islamic Dream Interpretation", "ar": "تفسير الأحلام في الإسلام"}, "dream_sub": {"ha": "Bisa littattafan Sheikh Ibn Sirin, An-Nabalusi, da Ibn Shaheen.", "en": "Based on the books of Ibn Sirin, an-Nabulsi and Ibn Shaheen.", "ar": "استناداً إلى كتب ابن سيرين والنابلسي وابن شاهين."}, "dream_q": {"ha": "Mene ne ka gani a mafarkinka?", "en": "What did you see in your dream?", "ar": "ماذا رأيت في منامك؟"}, "dream_btn": {"ha": "Nemi Fassarar Mafarki", "en": "Interpret my dream", "ar": "اطلب تفسير الحلم"}, "dream_loading": {"ha": "Ana duba fassarar mafarkinka a littattafan Musulunci...", "en": "Looking up your dream in the Islamic books...", "ar": "جارٍ البحث عن تفسير حلمك في الكتب الإسلامية..."}, "dream_empty": {"ha": "Rubuta mafarkinka a saman akwatin sannan ka latsa \"Nemi Fassarar Mafarki\".", "en": "Write your dream in the box above, then tap “Interpret my dream”.", "ar": "اكتب حلمك في المربع أعلاه ثم اضغط «اطلب تفسير الحلم»."}, "footer": {"ha": "Geomancy & Dream App • Tsarin Ilmin Ramli da Mafarki da Gemini AI", "en": "Geomancy & Dream App • Raml and dreams with Gemini AI", "ar": "تطبيق الرمل والأحلام • علم الرمل وتفسير الأحلام بالذكاء الاصطناعي Gemini"}, "set_title": {"ha": "Saitin Gemini API Key", "en": "Gemini API Key Settings", "ar": "إعدادات مفتاح Gemini API"}, "set_desc": {"ha": "Shigar da API Key dinka na Google Gemini don cin gajiyar fassara ta hanyar AI.", "en": "Enter your Google Gemini API key to use AI interpretation.", "ar": "أدخل مفتاح Google Gemini API الخاص بك لاستخدام التفسير بالذكاء الاصطناعي."}, "cancel": {"ha": "Soke", "en": "Cancel", "ar": "إلغاء"}, "save": {"ha": "Adana (Save)", "en": "Save", "ar": "حفظ"}, "names_title": {"ha": "Sunayen Taurari 16", "en": "The 16 Figures", "ar": "الأشكال الستة عشر"}, "hist_title": {"ha": "Tarihin Bincike", "en": "Reading History", "ar": "سجل القراءات"}, "gate_title": {"ha": "Ilmin Ramli", "en": "Raml (Geomancy)", "ar": "علم الرمل"}, "g_checking": {"ha": "Ana duba...", "en": "Checking...", "ar": "جارٍ التحقق..."}, "login": {"ha": "Shiga", "en": "Sign in", "ar": "دخول"}, "signup": {"ha": "Yi rajista", "en": "Sign up", "ar": "إنشاء حساب"}, "pay_text": {"ha": "Biya ₦12,000 sau ɗaya don buɗe manhajar har abada.", "en": "Pay ₦12,000 once to unlock the app forever.", "ar": "ادفع ₦12,000 مرة واحدة لفتح التطبيق إلى الأبد."}, "pay_btn": {"ha": "Biya ₦12,000 (Paystack)", "en": "Pay ₦12,000 (Paystack)", "ar": "ادفع ₦12,000 (Paystack)"}, "logout": {"ha": "Fita", "en": "Log out", "ar": "خروج"}, "set_key_title": {"ha": "Saitin Gemini Key", "en": "Gemini key settings", "ar": "إعدادات مفتاح Gemini"}, "hist_btn": {"ha": "Tarihin bincike", "en": "Reading history", "ar": "سجل القراءات"}, "names_btn": {"ha": "Sunayen taurari", "en": "Figure names", "ar": "أسماء الأشكال"}, "question_ph": {"ha": "Rubuta tambayarka anan (matsala, aure, kasuwanci...)", "en": "Write your question here (problem, marriage, business...)", "ar": "اكتب سؤالك هنا (مشكلة، زواج، تجارة...)"}, "dream_ph": {"ha": "Misali: Na yi mafarki ina cin zuma a cikin gonar itatuwa, ko na gani ina tafiya cikin ruwa mai kyau...", "en": "Example: I dreamt I was eating honey in an orchard, or walking through clear water...", "ar": "مثال: رأيت في المنام أنني آكل عسلاً في بستان، أو أمشي في ماء صافٍ..."}, "email_ph": {"ha": "Imel", "en": "Email", "ar": "البريد الإلكتروني"}, "pass_ph": {"ha": "Kalmar sirri (aƙalla haruffa 6)", "en": "Password (at least 6 characters)", "ar": "كلمة المرور (6 أحرف على الأقل)"}, "g_login": {"ha": "Shiga ko yi rajista don ci gaba.", "en": "Sign in or sign up to continue.", "ar": "سجّل الدخول أو أنشئ حساباً للمتابعة."}, "g_signed": {"ha": "An shiga a matsayin ", "en": "Signed in as ", "ar": "تم الدخول باسم "}, "g_verify": {"ha": "Ana tabbatar da biyan kuɗi...", "en": "Verifying payment...", "ar": "جارٍ التحقق من الدفع..."}, "g_confirm": {"ha": "Duba imel ɗinka don tabbatar da rajista, sannan ka shiga.", "en": "Check your email to confirm your account, then sign in.", "ar": "تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول."}, "dream_alert": {"ha": "Don Allah rubuta abin da ka gani a mafarkinka tukunna.", "en": "Please write what you saw in your dream first.", "ar": "من فضلك اكتب ما رأيته في منامك أولاً."}, "h_loading": {"ha": "Ana ɗauko...", "en": "Loading...", "ar": "جارٍ التحميل..."}, "h_empty": {"ha": "Babu wani bincike da aka adana tukuna.", "en": "No saved readings yet.", "ar": "لا توجد قراءات محفوظة بعد."}, "h_dream": {"ha": "Mafarki", "en": "Dream", "ar": "حلم"}, "h_ramli": {"ha": "Ramli", "en": "Raml", "ar": "رمل"}, "h_noq": {"ha": "(babu tambaya)", "en": "(no question)", "ar": "(بلا سؤال)"}, "h_del": {"ha": "A share wannan bincike?", "en": "Delete this reading?", "ar": "هل تريد حذف هذه القراءة؟"}, "n_old": {"ha": "Na da: ", "en": "Previously: ", "ar": "سابقاً: "}};
+const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy Spread", "ar": "طالعك في علم الرمل"}, "title_analysis": {"ha": "Fassarar Gidaje & Magani", "en": "House Reading & Remedies", "ar": "تفسير البيوت والعلاج"}, "title_dream": {"ha": "Fassarar Mafarki", "en": "Dream Interpretation", "ar": "تفسير الأحلام"}, "tab_spread": {"ha": "Ramli", "en": "Raml", "ar": "الرمل"}, "tab_analysis": {"ha": "Fassara & Magani", "en": "Reading & Remedies", "ar": "التفسير والعلاج"}, "tab_dream": {"ha": "Fassarar Mafarki", "en": "Dreams", "ar": "الأحلام"}, "question_label": {"ha": "Tambayarka (Question):", "en": "Your question:", "ar": "سؤالك:"}, "mothers_title": {"ha": "Shigar da Uwaye (M1 - M4 Hagu zuwa Dama)", "en": "Enter the Mothers (M1–M4, left to right)", "ar": "أدخل الأمهات (م1 – م4 من اليسار إلى اليمين)"}, "auto": {"ha": "Zuba Ramli (Auto)", "en": "Cast Raml (Auto)", "ar": "اضرب الرمل (تلقائي)"}, "tap_hint": {"ha": "Latsa kowane layi don sauya tsakanin Digo 1 (●) ko Digo 2 (● ●):", "en": "Tap a line to switch between 1 dot (●) and 2 dots (● ●):", "ar": "اضغط على السطر للتبديل بين نقطة واحدة (●) ونقطتين (● ●):"}, "m1": {"ha": "M1 (Gida 1)", "en": "M1 (House 1)", "ar": "م1 (البيت 1)"}, "m2": {"ha": "M2 (Gida 2)", "en": "M2 (House 2)", "ar": "م2 (البيت 2)"}, "m3": {"ha": "M3 (Gida 3)", "en": "M3 (House 3)", "ar": "م3 (البيت 3)"}, "m4": {"ha": "M4 (Gida 4)", "en": "M4 (House 4)", "ar": "م4 (البيت 4)"}, "total": {"ha": "Total Points", "en": "Total Points", "ar": "مجموع النقاط"}, "analyze_btn": {"ha": "Fassara Wannan Taurari da Magani (Gemini AI)", "en": "Interpret this chart with remedies (Gemini AI)", "ar": "فسّر هذا الطالع مع العلاج (Gemini AI)"}, "analysis_title": {"ha": "Binciken Ilmin Ramli & Magani", "en": "Raml Analysis & Remedies", "ar": "تحليل علم الرمل والعلاج"}, "analysis_sub": {"ha": "Gidaje 16, Taurari, Matsaloli da Magani", "en": "16 houses, figures, problems and remedies", "ar": "البيوت الستة عشر والأشكال والمشكلات والعلاج"}, "reinterpret": {"ha": "Sake Fassara", "en": "Re-interpret", "ar": "إعادة التفسير"}, "loading1": {"ha": "Masani na AI yana nazarin gidaje 16 da haruffan taurari...", "en": "The AI is studying the 16 houses and figures...", "ar": "يدرس الذكاء الاصطناعي البيوت الستة عشر والأشكال..."}, "loading2": {"ha": "Ana duba magani da addu'o'i dace...", "en": "Finding suitable remedies and supplications...", "ar": "يجري البحث عن العلاج والأدعية المناسبة..."}, "analysis_empty": {"ha": "Latsa \"Fassara Wannan Taurari\" don samun cikakken bayani akan gidaje 16, gwanintarsu, matsaloli, da magani mai amfani.", "en": "Tap “Interpret this chart” to get a full reading of the 16 houses, their strengths, problems and practical remedies.", "ar": "اضغط «فسّر هذا الطالع» للحصول على تفسير كامل للبيوت الستة عشر وقوتها ومشكلاتها والعلاج المناسب."}, "dream_title": {"ha": "Fassarar Mafarki a Musulunci", "en": "Islamic Dream Interpretation", "ar": "تفسير الأحلام في الإسلام"}, "dream_sub": {"ha": "Bisa littattafan Sheikh Ibn Sirin, An-Nabalusi, da Ibn Shaheen.", "en": "Based on the books of Ibn Sirin, an-Nabulsi and Ibn Shaheen.", "ar": "استناداً إلى كتب ابن سيرين والنابلسي وابن شاهين."}, "dream_q": {"ha": "Mene ne ka gani a mafarkinka?", "en": "What did you see in your dream?", "ar": "ماذا رأيت في منامك؟"}, "dream_btn": {"ha": "Nemi Fassarar Mafarki", "en": "Interpret my dream", "ar": "اطلب تفسير الحلم"}, "dream_loading": {"ha": "Ana duba fassarar mafarkinka a littattafan Musulunci...", "en": "Looking up your dream in the Islamic books...", "ar": "جارٍ البحث عن تفسير حلمك في الكتب الإسلامية..."}, "dream_empty": {"ha": "Rubuta mafarkinka a saman akwatin sannan ka latsa \"Nemi Fassarar Mafarki\".", "en": "Write your dream in the box above, then tap “Interpret my dream”.", "ar": "اكتب حلمك في المربع أعلاه ثم اضغط «اطلب تفسير الحلم»."}, "footer": {"ha": "Geomancy & Dream App • Tsarin Ilmin Ramli da Mafarki da Gemini AI", "en": "Geomancy & Dream App • Raml and dreams with Gemini AI", "ar": "تطبيق الرمل والأحلام • علم الرمل وتفسير الأحلام بالذكاء الاصطناعي Gemini"}, "set_title": {"ha": "Saitin Gemini API Key", "en": "Gemini API Key Settings", "ar": "إعدادات مفتاح Gemini API"}, "set_desc": {"ha": "Shigar da API Key dinka na Google Gemini don cin gajiyar fassara ta hanyar AI.", "en": "Enter your Google Gemini API key to use AI interpretation.", "ar": "أدخل مفتاح Google Gemini API الخاص بك لاستخدام التفسير بالذكاء الاصطناعي."}, "cancel": {"ha": "Soke", "en": "Cancel", "ar": "إلغاء"}, "save": {"ha": "Adana (Save)", "en": "Save", "ar": "حفظ"}, "names_title": {"ha": "Sunayen Taurari 16", "en": "The 16 Figures", "ar": "الأشكال الستة عشر"}, "hist_title": {"ha": "Tarihin Bincike", "en": "Reading History", "ar": "سجل القراءات"}, "gate_title": {"ha": "Ilmin Ramli", "en": "Raml (Geomancy)", "ar": "علم الرمل"}, "g_checking": {"ha": "Ana duba...", "en": "Checking...", "ar": "جارٍ التحقق..."}, "login": {"ha": "Shiga", "en": "Sign in", "ar": "دخول"}, "signup": {"ha": "Yi rajista", "en": "Sign up", "ar": "إنشاء حساب"}, "pay_text": {"ha": "Biya ₦12,000 sau ɗaya don buɗe manhajar har abada.", "en": "Pay ₦12,000 once to unlock the app forever.", "ar": "ادفع ₦12,000 مرة واحدة لفتح التطبيق إلى الأبد."}, "pay_btn": {"ha": "Biya ₦12,000 (Paystack)", "en": "Pay ₦12,000 (Paystack)", "ar": "ادفع ₦12,000 (Paystack)"}, "logout": {"ha": "Fita", "en": "Log out", "ar": "خروج"}, "set_key_title": {"ha": "Saitin Gemini Key", "en": "Gemini key settings", "ar": "إعدادات مفتاح Gemini"}, "hist_btn": {"ha": "Tarihin bincike", "en": "Reading history", "ar": "سجل القراءات"}, "names_btn": {"ha": "Sunayen taurari", "en": "Figure names", "ar": "أسماء الأشكال"}, "question_ph": {"ha": "Rubuta tambayarka anan (matsala, aure, kasuwanci...)", "en": "Write your question here (problem, marriage, business...)", "ar": "اكتب سؤالك هنا (مشكلة، زواج، تجارة...)"}, "dream_ph": {"ha": "Misali: Na yi mafarki ina cin zuma a cikin gonar itatuwa, ko na gani ina tafiya cikin ruwa mai kyau...", "en": "Example: I dreamt I was eating honey in an orchard, or walking through clear water...", "ar": "مثال: رأيت في المنام أنني آكل عسلاً في بستان، أو أمشي في ماء صافٍ..."}, "email_ph": {"ha": "Imel", "en": "Email", "ar": "البريد الإلكتروني"}, "pass_ph": {"ha": "Kalmar sirri (aƙalla haruffa 6)", "en": "Password (at least 6 characters)", "ar": "كلمة المرور (6 أحرف على الأقل)"}, "g_login": {"ha": "Shiga ko yi rajista don ci gaba.", "en": "Sign in or sign up to continue.", "ar": "سجّل الدخول أو أنشئ حساباً للمتابعة."}, "g_signed": {"ha": "An shiga a matsayin ", "en": "Signed in as ", "ar": "تم الدخول باسم "}, "g_verify": {"ha": "Ana tabbatar da biyan kuɗi...", "en": "Verifying payment...", "ar": "جارٍ التحقق من الدفع..."}, "g_confirm": {"ha": "Duba imel ɗinka don tabbatar da rajista, sannan ka shiga.", "en": "Check your email to confirm your account, then sign in.", "ar": "تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول."}, "dream_alert": {"ha": "Don Allah rubuta abin da ka gani a mafarkinka tukunna.", "en": "Please write what you saw in your dream first.", "ar": "من فضلك اكتب ما رأيته في منامك أولاً."}, "h_loading": {"ha": "Ana ɗauko...", "en": "Loading...", "ar": "جارٍ التحميل..."}, "h_empty": {"ha": "Babu wani bincike da aka adana tukuna.", "en": "No saved readings yet.", "ar": "لا توجد قراءات محفوظة بعد."}, "h_dream": {"ha": "Mafarki", "en": "Dream", "ar": "حلم"}, "h_ramli": {"ha": "Ramli", "en": "Raml", "ar": "رمل"}, "h_noq": {"ha": "(babu tambaya)", "en": "(no question)", "ar": "(بلا سؤال)"}, "h_del": {"ha": "A share wannan bincike?", "en": "Delete this reading?", "ar": "هل تريد حذف هذه القراءة؟"}, "n_old": {"ha": "Na da: ", "en": "Previously: ", "ar": "سابقاً: "}, "key_guide_title": {"ha": "Yadda ake ɗauko API Key (kyauta, kamar minti 2):", "en": "How to get an API key (free, about 2 minutes):", "ar": "كيف تحصل على مفتاح API (مجاناً، نحو دقيقتين):"}, "key_s1": {"ha": "Ka ɗauki maballin da ke ƙasa don buɗe Google AI Studio:", "en": "Tap the button below to open Google AI Studio:", "ar": "اضغط على الزر أدناه لفتح Google AI Studio:"}, "key_s2": {"ha": "Ka shiga da asusun Google (Gmail) ɗinka.", "en": "Sign in with your Google (Gmail) account.", "ar": "سجّل الدخول بحساب Google (Gmail) الخاص بك."}, "key_s3": {"ha": "Ka ɗauki maballin “Create API key” (Create key).", "en": "Tap “Create API key”.", "ar": "اضغط على «Create API key»."}, "key_s4": {"ha": "Ka kwafi key ɗin (yana farawa da AIza...).", "en": "Copy the key (it starts with AIza...).", "ar": "انسخ المفتاح (يبدأ بـ AIza...)."}, "key_s5": {"ha": "Ka dawo nan ka liza shi a filin da ke ƙasa, sannan ka taba Adana.", "en": "Come back here, paste it in the box below, then tap Save.", "ar": "ارجع إلى هنا والصقه في الحقل أدناه ثم اضغط حفظ."}, "key_note": {"ha": "Key ɗin yana nan a wayarka ne kawai. Ba ma adana shi a wani wuri.", "en": "The key stays only on your device. We do not store it anywhere.", "ar": "يبقى المفتاح على جهازك فقط ولا نخزّنه في أي مكان."}, "need_key": {"ha": "Kana bukatar Gemini API Key kafin ka yi fassara. Bi matakan da ke nan.", "en": "You need a Gemini API key before interpreting. Follow the steps here.", "ar": "تحتاج إلى مفتاح Gemini API قبل التفسير. اتبع الخطوات هنا."}, "err_title": {"ha": "Kuskure:", "en": "Error:", "ar": "خطأ:"}, "err_ramli": {"ha": "Ba a samu nasarar fassara ba. Tabbatar da ka shigar da Gemini API Key ɗinka daidai a saiti, ko ka jira ɗan lokaci idan ka kai iyaka ta kyauta.", "en": "The interpretation failed. Check that your Gemini API key is correct in settings, or wait a while if you hit the free limit.", "ar": "تعذّر التفسير. تأكد من إدخال مفتاح Gemini API الصحيح في الإعدادات، أو انتظر قليلاً إن بلغت الحد المجاني."}, "err_dream": {"ha": "Ba a samu nasarar samun fassarar mafarki ba. Tabbatar da an saka Gemini API Key daidai a saiti, ko ka jira ɗan lokaci.", "en": "The dream interpretation failed. Check that your Gemini API key is correct in settings, or wait a while.", "ar": "تعذّر تفسير الحلم. تأكد من إدخال مفتاح Gemini API الصحيح في الإعدادات، أو انتظر قليلاً."}, "err_btn": {"ha": "Shigar da API Key", "en": "Enter API key", "ar": "إدخال مفتاح API"}, "watch_video": {"ha": "Kalli bidiyon yadda ake yi", "en": "Watch the video tutorial", "ar": "شاهد الفيديو التوضيحي"}, "video_title": {"ha": "Yadda ake ɗauko API Key", "en": "How to get your API key", "ar": "كيف تحصل على مفتاح API"}, "video_close": {"ha": "Rufe", "en": "Close", "ar": "إغلاق"}, "open_google": {"ha": "Taba nan don ɗauko API Key (Google AI Studio)", "en": "Tap here to get your API key (Google AI Studio)", "ar": "اضغط هنا للحصول على مفتاح API (Google AI Studio)"}, "banner_text": {"ha": "Don yin fassara da AI, kana buƙatar Gemini API Key (kyauta).", "en": "To use AI interpretation you need a Gemini API key (free).", "ar": "لاستخدام التفسير بالذكاء الاصطناعي تحتاج إلى مفتاح Gemini API (مجاني)."}, "banner_get": {"ha": "Dauko key → Google", "en": "Get key → Google", "ar": "احصل على المفتاح ← Google"}, "banner_enter": {"ha": "Saka key", "en": "Enter key", "ar": "أدخل المفتاح"}, "get_key_btn": {"ha": "Buɗe Google AI Studio don ɗauko key", "en": "Open Google AI Studio to get the key", "ar": "افتح Google AI Studio للحصول على المفتاح"}};
         let LANG = (function () { try { return localStorage.getItem('lang') || 'ha'; } catch (e) { return 'ha'; } })();
         let currentTab = 'spread';
         const t = k => (T[k] && T[k][LANG]) || (T[k] && T[k].ha) || k;
@@ -344,6 +372,7 @@ const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy S
             document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
             document.body.classList.toggle('rtl-text', l === 'ar');
             applyI18n();
+            refreshKeyBanner();
             renderShieldChart();
             switchTab(currentTab);
         }
@@ -560,6 +589,7 @@ const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy S
         }
 
         function openSettingsModal() {
+            document.getElementById('keyVideoBtn').classList.toggle('hidden', !keyVideoUrl());
             document.getElementById('geminiApiKeyInput').value = getStoredApiKey();
             document.getElementById('settingsModal').classList.remove('hidden');
             document.getElementById('settingsModal').classList.add('flex');
@@ -570,9 +600,15 @@ const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy S
             document.getElementById('settingsModal').classList.remove('flex');
         }
 
+        function refreshKeyBanner() {
+            const b = document.getElementById('keyBanner');
+            if (b) b.classList.toggle('hidden', !!getStoredApiKey());
+        }
+
         function saveApiKey() {
             const key = document.getElementById('geminiApiKeyInput').value.trim();
             localStorage.setItem('gemini_api_key', key);
+            refreshKeyBanner();
             closeSettingsModal();
         }
 
@@ -633,6 +669,7 @@ const T = {"title_spread": {"ha": "Your Geomancy Spread", "en": "Your Geomancy S
         // AI GEOMANCY SPREAD ANALYSIS
         async function analyzeSpreadWithAI() {
             switchTab('analysis');
+            if (!getStoredApiKey()) { alert(t('need_key')); openSettingsModal(); return; }
             const question = document.getElementById('questionInput').value || 'Mene ne taurarina ke fada?';
             const totalPoints = calculateTotalPoints();
 
@@ -666,8 +703,8 @@ Duk amsarka, har da taken sassan, ta kasance a cikin harshen ${langName()} kawai
             } catch (err) {
                 document.getElementById('analysisResult').innerHTML = `
                     <div class="p-3 bg-red-50 text-red-700 rounded text-xs">
-                        <strong>Kuskure:</strong> Ba a samu nasarar fassara ba. Tabbatar da ka shigar da Gemini API Key dinka a saiti (ikona na makey a sama).<br/>
-                        <button onclick="openSettingsModal()" class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs">Shigar da API Key</button>
+                        <strong>${t('err_title')}</strong> ${t('err_ramli')}<br/>
+                        <button onclick="openSettingsModal()" class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs">${t('err_btn')}</button>
                     </div>`;
             } finally {
                 document.getElementById('analysisLoading').classList.add('hidden');
@@ -681,6 +718,7 @@ Duk amsarka, har da taken sassan, ta kasance a cikin harshen ${langName()} kawai
                 alert(t('dream_alert'));
                 return;
             }
+            if (!getStoredApiKey()) { alert(t('need_key')); openSettingsModal(); return; }
 
             document.getElementById('dreamLoading').classList.remove('hidden');
             document.getElementById('dreamResult').innerHTML = '';
@@ -698,8 +736,8 @@ Yi bayani cikin harshen ${langName()} daki-daki:
             } catch (err) {
                 document.getElementById('dreamResult').innerHTML = `
                     <div class="p-3 bg-red-50 text-red-700 rounded text-xs">
-                        <strong>Kuskure:</strong> Ba a samu nasarar samun fassarar mafarki ba. Tabbatar da an saka Gemini API Key a saiti.<br/>
-                        <button onclick="openSettingsModal()" class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs">Shigar da API Key</button>
+                        <strong>${t('err_title')}</strong> ${t('err_dream')}<br/>
+                        <button onclick="openSettingsModal()" class="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs">${t('err_btn')}</button>
                     </div>`;
             } finally {
                 document.getElementById('dreamLoading').classList.add('hidden');
@@ -829,6 +867,20 @@ Yi bayani cikin harshen ${langName()} daki-daki:
             const { error } = await sb.from('readings').delete().eq('id', r.id);
             if (error) alert(error.message); else openHistory();
         }
+
+
+        // ====== Bidiyon koyarwa (saka hanyar bidiyo a nan; YouTube ko fayil mp4) ======
+        const KEY_VIDEOS = { ha: '', en: '', ar: '' };   // misali: ha: 'https://youtu.be/XXXXXXXXXXX' ko 'video/key-ha.mp4'
+        function keyVideoUrl() { return KEY_VIDEOS[LANG] || KEY_VIDEOS.ha || ''; }
+        function openKeyVideo() {
+            const u = keyVideoUrl(); if (!u) return;
+            const yt = u.match(/(?:youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{11})/);
+            $g('videoBox').innerHTML = yt
+                ? `<iframe class="w-full rounded" style="aspect-ratio:16/9" src="https://www.youtube-nocookie.com/embed/${yt[1]}" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>`
+                : `<video class="w-full rounded" controls playsinline preload="metadata" src="${esc(u)}"></video>`;
+            $g('videoModal').style.display = 'flex';
+        }
+        function closeKeyVideo() { $g('videoModal').style.display = 'none'; $g('videoBox').innerHTML = ''; }
 
         // ====== Sunayen taurari ======
         function openNamesModal() {
