@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manhajar Ramli</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#0d9488">
+    <meta property="og:title" content="Manhajar Ramli - Ilimin Ramli da fassarar AI">
+    <meta property="og:description" content="Zuba Ramli, ka sami fassarar gidaje 16 da shawara. Biya sau ɗaya, amfani har abada.">
+    <meta property="og:image" content="https://abubakarsaddishuaibu-blip.github.io/ramli-/icon-512.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0f1715;
+            color: #e2e8f0;
+        }
+        .arabic-font {
+            font-family: 'Amiri', serif;
+        }
+        .bg-teal-card {
+            background: linear-gradient(145deg, #112e2b, #0b1f1d);
+            border: 1px solid #14532d;
+        }
+        .btn-dots {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-dots:hover {
+            transform: scale(1.05);
+        }
+        .active-dot {
+            background-color: #0d9488;
+            color: #ffffff;
+            border-color: #2dd4bf;
+        }
+        .modal-blur {
+            backdrop-filter: blur(8px);
+        }
+        .pricing-card {
+            background: linear-gradient(160deg, #112e2b 0%, #081715 100%);
+            border: 1px solid rgba(45, 212, 191, 0.25);
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover {
+            border-color: #f59e0b;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-10">
+
+    <!-- Rajista / Shiga -->
+    <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 modal-blur">
+        <div class="bg-teal-950 border-2 border-teal-600/80 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="text-right mb-2"><select onchange="setLang(this.value)" class="lang-sel text-xs text-teal-950 font-bold rounded px-1.5 py-1 bg-amber-300"><option value="ha">Hausa</option><option value="en">English</option><option value="ar">العربية</option></select></div>
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 mx-auto rounded-full bg-teal-800/50 border border-teal-400 flex items-center justify-center text-teal-300 text-2xl mb-2"><i class="fa-solid fa-shapes"></i></div>
+                <h2 class="text-xl font-bold text-teal-300" id="auth-title"><span data-i18n="s0">Shiga</span></h2>
+                <p class="text-xs text-teal-200/70 mt-1"><span data-i18n="s1">Ilimin Ramli da fassarar AI</span></p>
+            </div>
+            <div class="space-y-3">
+                <div id="a-name-wrap" class="hidden">
+                    <label class="block text-xs text-teal-200 mb-1"><span data-i18n="s2">Suna</span></label>
+                    <input type="text" id="a-name" autocomplete="name" class="w-full bg-teal-900/80 border border-teal-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-teal-200 mb-1"><span data-i18n="s3">Imel</span></label>
+                    <input type="email" id="a-email" autocomplete="email" class="w-full bg-teal-900/80 border border-teal-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-teal-200 mb-1"><span data-i18n="s4">Kalmar sirri (aƙalla haruffa 6)</span></label>
+                    <input type="password" id="a-pass" autocomplete="current-password" class="w-full bg-teal-900/80 border border-teal-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-teal-400">
+                </div>
+                <button id="auth-submit" onclick="handleAuth()" class="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg text-sm transition"><span data-i18n="s0">Shiga</span></button>
+                <button id="auth-switch" onclick="toggleAuthForms()" class="w-full text-xs text-teal-300 underline pt-1"><span data-i18n="s5">Ba ka da asusu? Yi rajista</span></button>
+                <p id="auth-msg" class="text-xs text-rose-300 text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sayen kiredit -->
+    <div id="pay-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 modal-blur">
+        <div class="bg-teal-950 border-2 border-amber-500/70 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold text-amber-300"><i class="fa-solid fa-coins"></i> <span data-i18n="s6">Sayi kiredit</span></h2>
+                <button onclick="closePay()" class="text-teal-300 px-2 text-lg">✕</button>
+            </div>
+            <p class="text-sm text-teal-100"><span data-i18n="s7">Kiredit</span> <strong class="text-amber-300">3</strong> <span data-i18n="s8">ake cirewa ga kowace tambaya. Kana da:</span> <strong id="modal-credits" class="text-amber-300">0</strong> <span data-i18n="s9">kiredit.</span></p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="startPayment(500)" class="pricing-card rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-400">₦500</div>
+                    <div class="text-[11px] text-teal-200"><span data-i18n="s45">Kiredit 20 · tambayoyi 6</span></div>
+                </button>
+                <button onclick="startPayment(1000)" class="pricing-card rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-400">₦1,000</div>
+                    <div class="text-[11px] text-teal-200"><span data-i18n="s46">Kiredit 40 · tambayoyi 13</span></div>
+                </button>
+                <button onclick="startPayment(2000)" class="pricing-card rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-400">₦2,000</div>
+                    <div class="text-[11px] text-teal-200"><span data-i18n="s47">Kiredit 80 · tambayoyi 26</span></div>
+                </button>
+                <button onclick="startPayment(5000)" class="pricing-card rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-400">₦5,000</div>
+                    <div class="text-[11px] text-teal-200"><span data-i18n="s48">Kiredit 200 · tambayoyi 66</span></div>
+                </button>
+                <button onclick="startPayment(10000)" class="pricing-card rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-400">₦10,000</div>
+                    <div class="text-[11px] text-teal-200"><span data-i18n="s49">Kiredit 400 · tambayoyi 133</span></div>
+                </button>
+            </div>
+            <p class="text-[11px] text-teal-300/70"><span data-i18n="s10">Kiredit ba ya ƙarewa a lokaci, kuma abin da ya rage yana nan idan ka sake sayen. Sayen yana wucewa ta Paystack.</span></p>
+            <p id="pay-msg" class="text-xs text-rose-300"></p>
+        </div>
+    </div>
+
+    <!-- Tarihin bincike -->
+    <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 modal-blur">
+        <div class="bg-teal-950 border-2 border-teal-600/80 rounded-2xl max-w-md w-full p-4 shadow-2xl max-h-[88vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-2"><b class="text-teal-300 text-sm" data-i18n="hist_title">Tarihin Bincike</b><button onclick="closeHistory()" class="text-teal-300 px-2 text-lg">✕</button></div>
+            <div id="history-list" class="text-xs text-teal-100"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="w-full bg-teal-950/90 border-b border-teal-800/50 py-3 px-4 sm:px-6 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-teal-800/40 border border-teal-400 flex items-center justify-center text-teal-300 text-xl font-bold">
+                    <i class="fa-solid fa-shapes"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold text-teal-300 leading-none"><span data-i18n="s11">Zauren Bincike na Ilimin Ramli</span></h1>
+                    </div>
+                    <p class="text-xs text-teal-200/60 mt-1"><span data-i18n="s12">Malamin Zaure - Premium Geomancy Platform</span></p>
+                </div>
+            </div>
+
+            <!-- Install App (PWA), User Balance, WhatsApp Contact & Profile Widget -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <select onchange="setLang(this.value)" class="lang-sel text-xs text-teal-950 font-bold rounded px-1.5 py-1 bg-amber-300"><option value="ha">Hausa</option><option value="en">English</option><option value="ar">العربية</option></select>
+                <button onclick="openHistory()" data-i18n-title="hist_btn" class="px-2.5 py-1.5 text-xs bg-teal-900/80 hover:bg-teal-800 border border-teal-600/60 rounded-lg text-teal-200 transition"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                <!-- App Install Prompt Button (PWA Trigger) -->
+                <button id="pwa-install-btn" onclick="installAppDirectly()" class="bg-emerald-500 hover:bg-emerald-400 text-teal-950 font-extrabold text-xs px-3 py-1.5 rounded-lg border border-emerald-300 shadow-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span><span data-i18n="s13">INSTALL APP (APK / PWA)</span></span>
+                </button>
+
+                <!-- Direct WhatsApp Contact Button -->
+                <a href="https://wa.me/2348143339656?text=Sannu%20Malamin%20Zaure,%20ina%20bu%C9%97atar%20magana%20da%20kai." target="_blank" rel="noopener noreferrer" class="bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/60 px-2.5 py-1.5 rounded-lg text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition">
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i>
+                    <span class="hidden sm:inline">WhatsApp</span>
+                </a>
+
+                <button onclick="openPay()" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/50 px-3 py-1.5 rounded-lg text-amber-300 font-bold text-xs flex items-center gap-2 transition">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span><span data-i18n="s14">Kiredit:</span> <span id="credit-display">0</span></span>
+                    <i class="fa-solid fa-circle-plus text-amber-400"></i>
+                </button>
+
+                <div id="user-profile-badge" class="hidden text-xs bg-teal-900/80 border border-teal-600/60 px-3 py-1.5 rounded-lg text-teal-200 font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-circle text-amber-400"></i> <span id="header-user-name"><span data-i18n="s2">Suna</span></span>
+                </div>
+                <button onclick="logoutUser()" class="px-2.5 py-1.5 text-xs bg-rose-900/60 hover:bg-rose-800 border border-rose-600/50 rounded-lg text-rose-100 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 pt-6 flex-grow flex flex-col gap-6">
+
+        <!-- Custom Notification Toast (In Place of Native Alert) -->
+        <div id="app-toast" class="hidden transition-all duration-300 p-4 rounded-xl border text-sm text-center font-medium shadow-xl"></div>
+
+        <!-- Gemini API Key (na mai amfani) -->
+        <div class="bg-teal-950/80 border border-teal-700/60 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <label for="custom-api-key" class="text-xs font-bold text-amber-300"><i class="fa-solid fa-key text-amber-400"></i> <span data-i18n="s15">Gemini API Key naka (kyauta) don fassarar AI:</span></label>
+                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-semibold"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span data-i18n="s16">Ɗauko key a Google AI Studio</span></a>
+            </div>
+            <div class="flex gap-2">
+                <input type="password" id="custom-api-key" autocomplete="off" placeholder="AIza..." class="w-full bg-teal-900/90 border border-teal-600 rounded-lg p-3 text-xs text-teal-100 focus:outline-none focus:border-amber-400">
+                <button onclick="toggleApiKeyVisibility()" class="px-4 py-2 bg-teal-800 hover:bg-teal-700 text-teal-200 text-xs rounded-lg border border-teal-600"><i id="eye-icon" class="fa-solid fa-eye"></i></button>
+            </div>
+            <p class="text-[11px] text-teal-300/70"><span data-i18n="s17">Key ɗin yana a wayarka kawai, ba ma adana shi a wani wuri. Zuba Ramli da bayanin gidaje 16 suna aiki ba tare da shi ba; key ɗin don fassarar AI ne kawai.</span></p>
+        </div>
+
+        <!-- Input & Ummahatu Section -->
+        <div class="bg-teal-card rounded-2xl p-6 shadow-xl border border-teal-800/60">
+            <h2 class="text-lg font-semibold text-teal-300 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="s18">1. Sunanka, Manufa / Tambayarka & Ummahatu (M1 - M4)</span>
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-medium text-teal-200/80 mb-1"><span data-i18n="s19">Sunanka (Ko wanda ake bincikawa):</span></label>
+                    <input type="text" id="user-name" placeholder="Rubuta sunanka" data-i18n-ph="p0" value="" class="w-full bg-teal-950/80 border border-teal-700/60 rounded-xl p-3 text-sm text-teal-100 focus:outline-none focus:border-teal-400 transition placeholder-teal-800">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-medium text-teal-200/80 mb-1"><span data-i18n="s20">Tambaya ko Manufarka (Question):</span></label>
+                    <input type="text" id="user-question" placeholder="Misali: Dalilin da ya sa da zarar dare ya yi nake jin kasala da nauyin jiki wajen karatu?" data-i18n-ph="p1" class="w-full bg-teal-950/80 border border-teal-700/60 rounded-xl p-3 text-sm text-teal-100 focus:outline-none focus:border-teal-400 transition placeholder-teal-800">
+                </div>
+            </div>
+
+            <!-- Manual Input of 4 Mothers (M1, M2, M3, M4) -->
+            <p class="text-xs text-teal-300/80 mb-3 font-semibold"><span data-i18n="s21">Latsa kowane layi don sauya tsakanin Digo 1 (●) ko Digo 2 (● ●):</span></p>
+            
+            <div class="grid grid-cols-4 gap-2 sm:gap-4 mb-6 text-center" dir="rtl">
+                <!-- M1 (First Mother - Right) -->
+                <div class="flex flex-col justify-start gap-2 items-center bg-teal-950/60 p-3 rounded-xl border border-teal-800/50" dir="ltr">
+                    <div class="w-full h-9 flex flex-col justify-center text-center leading-tight"><div class="text-sm font-bold text-teal-300"><span data-i18n="s22">M1</span></div><div class="text-[10px] text-teal-400/80 whitespace-nowrap"><span data-i18n="s26">Uwa ta 1</span></div></div>
+                    <div id="m1-inputs" class="flex flex-col gap-1.5 w-full"></div>
+                </div>
+                <!-- M2 -->
+                <div class="flex flex-col justify-start gap-2 items-center bg-teal-950/60 p-3 rounded-xl border border-teal-800/50" dir="ltr">
+                    <div class="w-full h-9 flex flex-col justify-center text-center leading-tight"><div class="text-sm font-bold text-teal-300"><span data-i18n="s23">M2</span></div><div class="text-[10px] text-teal-400/80 whitespace-nowrap"><span data-i18n="s27">Uwa ta 2</span></div></div>
+                    <div id="m2-inputs" class="flex flex-col gap-1.5 w-full"></div>
+                </div>
+                <!-- M3 -->
+                <div class="flex flex-col justify-start gap-2 items-center bg-teal-950/60 p-3 rounded-xl border border-teal-800/50" dir="ltr">
+                    <div class="w-full h-9 flex flex-col justify-center text-center leading-tight"><div class="text-sm font-bold text-teal-300"><span data-i18n="s24">M3</span></div><div class="text-[10px] text-teal-400/80 whitespace-nowrap"><span data-i18n="s28">Uwa ta 3</span></div></div>
+                    <div id="m3-inputs" class="flex flex-col gap-1.5 w-full"></div>
+                </div>
+                <!-- M4 (Fourth Mother - Left) -->
+                <div class="flex flex-col justify-start gap-2 items-center bg-teal-950/60 p-3 rounded-xl border border-teal-800/50" dir="ltr">
+                    <div class="w-full h-9 flex flex-col justify-center text-center leading-tight"><div class="text-sm font-bold text-teal-300"><span data-i18n="s25">M4</span></div><div class="text-[10px] text-teal-400/80 whitespace-nowrap"><span data-i18n="s29">Uwa ta 4</span></div></div>
+                    <div id="m4-inputs" class="flex flex-col gap-1.5 w-full"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="calculateGeomancy()" class="px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-teal-950 font-extrabold text-sm rounded-xl shadow-xl transition active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="s30">ZUBA RAMLI (kiredit 3)</span>
+                </button>
+                <button onclick="randomizeMothers()" class="px-4 py-3 bg-teal-900/80 hover:bg-teal-800 text-teal-200 rounded-xl border border-teal-700/60 text-sm transition">
+                    <i class="fa-solid fa-dice mr-1"></i> <span data-i18n="s31">Bazuwa (Random Ummahatu)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Full Geomancy Chart Spread Output -->
+        <div id="spread-section" class="hidden bg-teal-card rounded-2xl p-6 border border-teal-600/50 shadow-2xl">
+            
+            <div class="text-center border-b border-teal-800/60 pb-4 mb-6">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-teal-400 mb-1"><span data-i18n="s32">Your Geomancy Spread</span></h3>
+                <p id="display-question" class="text-lg font-bold text-white mb-1">"..."</p>
+                <p id="display-date" class="text-xs text-teal-300/60"></p>
+            </div>
+
+            <!-- Geometric Chart Layout (Shield) -->
+            <div class="space-y-4 max-w-2xl mx-auto my-6">
+                
+                <!-- Row 1: Mothers (1-4) & Daughters (5-8) = Houses 1 to 8 -->
+                <div class="text-center text-xs text-teal-400 font-semibold mb-1"><span data-i18n="s33">Houses 1 - 8 (Ummahatu & Banatu)</span></div>
+                <div class="grid grid-cols-8 gap-1 sm:gap-2 text-center" dir="rtl" id="row-houses-1-8"></div>
+
+                <!-- Row 2: Nieces (9-12) -->
+                <div class="text-center text-xs text-teal-400 font-semibold mt-4 mb-1"><span data-i18n="s34">Houses 9 - 12 (Nawafi'u)</span></div>
+                <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto text-center" dir="rtl" id="row-houses-9-12"></div>
+
+                <!-- Row 3: Witnesses (13 Right, 14 Left) -->
+                <div class="text-center text-xs text-teal-400 font-semibold mt-4 mb-1"><span data-i18n="s35">Shaidun Dama da Hagu (Witnesses 13 & 14)</span></div>
+                <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto text-center" dir="rtl" id="row-witnesses"></div>
+
+                <!-- Row 4: Judge (15) -->
+                <div class="text-center text-xs text-teal-400 font-semibold mt-4 mb-1"><span data-i18n="s36">Alƙali / Judge (House 15)</span></div>
+                <div class="max-w-[120px] mx-auto text-center" id="row-judge"></div>
+
+                <!-- Row 5: Reconciler / Sub-Judge (16) -->
+                <div class="text-center text-xs text-teal-400 font-semibold mt-4 mb-1"><span data-i18n="s37">Mizan / Sultan (House 16)</span></div>
+                <div class="max-w-[120px] mx-auto text-center" id="row-reconciler"></div>
+
+            </div>
+
+            <!-- Total Points Summary -->
+            <div class="flex justify-between items-center bg-teal-950/90 border border-teal-700/60 rounded-xl p-4 max-w-md mx-auto my-6">
+                <span class="text-sm font-bold text-teal-200"><span data-i18n="s38">Total Points (Adadin Digo):</span></span>
+                <span id="total-points-val" class="text-xl font-extrabold text-teal-400">0</span>
+            </div>
+
+            <!-- AI Generative Button Banner -->
+            <div class="bg-gradient-to-r from-purple-900/60 via-teal-900/80 to-indigo-900/60 border border-purple-500/50 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 shadow-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-purple-600/30 border border-purple-400 flex items-center justify-center text-purple-300 text-lg">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-purple-200"><span data-i18n="s39">Gemini AI Malamin Zaure</span></h4>
+                        <p class="text-xs text-teal-200/80"><span data-i18n="s40">Yi amfani da Gemini AI domin zurfafa fassarar gidaje 16, Tahlili, da Waraka take.</span></p>
+                    </div>
+                </div>
+                <button id="btn-gemini-interpret" onclick="generateGeminiInterpretation()" class="w-full sm:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-brain"></i> <span data-i18n="s41">Nemawa Daga Gemini AI</span>
+                </button>
+            </div>
+
+            <!-- Loading Indicator for Gemini -->
+            <div id="gemini-loading" class="hidden bg-teal-950/90 border border-purple-500/40 rounded-xl p-6 text-center space-y-3 mb-6">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
+                <p class="text-sm font-semibold text-purple-300"><span data-i18n="s42">Gemini AI yana fassara zubin Ramli da fitar da magunguna da addu'a...</span></p>
+                <p class="text-xs text-teal-300/70">Muna amfani da `gemini-3-flash-preview` don zurfafa amsa a cikin Hausa...</p>
+            </div>
+
+            <!-- Detailed Reading & Interpretation - Malamin Zaure Style -->
+            <div id="reading-section" class="hidden space-y-4 border-t border-teal-800/60 pt-6">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <h4 class="text-md font-bold text-teal-300 flex items-center gap-2">
+                        <i class="fa-solid fa-scroll text-amber-400"></i> <span data-i18n="s43">FASSARAR ZAUREN BINCIKE NA ILIMIN RAMLI</span>
+                    </h4>
+                    <span id="ai-badge" class="text-xs px-3 py-1 bg-teal-800/60 border border-teal-500/40 text-teal-300 rounded-full font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-user-ninja text-amber-400"></i> Malamin Zaure
+                    </span>
+                </div>
+
+                <div class="flex gap-2 flex-wrap">
+                    <button onclick="copyResult()" class="bg-teal-700 hover:bg-teal-600 text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5"><i class="fa-solid fa-copy"></i> <span data-i18n="copy_btn">Kwafi sakamako</span></button>
+                    <button onclick="shareResult()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5"><i class="fa-brands fa-whatsapp"></i> <span data-i18n="share_btn">Tura ta WhatsApp</span></button>
+                </div>
+                <div id="ai-markdown" class="bg-teal-950/80 p-6 rounded-xl border border-teal-800/80 text-teal-100 leading-relaxed text-sm"></div>
+                <div id="legacy-reading" class="hidden">
+                    
+                    <!-- Greeting & Intro -->
+                    <div class="border-b border-teal-800/60 pb-4">
+                        <p class="arabic-font text-lg text-teal-300 mb-2">Bismillahi, Rahmani, Rahim.</p>
+                        <p class="text-sm">Daga Zauren Bincike na Ilimin Ramli, tare da <strong id="malam-title" class="text-teal-300">Malamin Zaure</strong>.</p>
+                        <p id="malamin-intro-text" class="text-sm mt-2 text-teal-200/90"></p>
+                    </div>
+
+                    <!-- 16 Houses Breakdown -->
+                    <div>
+                        <h5 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check"></i> FASSARAR GIDAJE 16 AKAN BUKATARKA:
+                        </h5>
+                        <div id="houses-breakdown-list" class="space-y-3 text-xs sm:text-sm">
+                            <!-- 16 houses injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- TAHLILI (Shawarar Kwararre) -->
+                    <div class="bg-teal-900/40 border border-teal-700/50 p-4 rounded-xl space-y-2">
+                        <h5 class="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-amber-400"></i> TAHLILI (SHAWARAR KWARARRE)
+                        </h5>
+                        <p id="tahlili-text" class="text-sm text-teal-100 leading-relaxed"></p>
+                    </div>
+
+                    <!-- WARAKA DA MAGANI (REMEDIES) -->
+                    <div class="bg-teal-900/60 border border-amber-500/40 p-5 rounded-xl space-y-4">
+                        <h5 class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-hands-praying text-amber-400"></i> WARAKA DA MAGANI (REMEDIES)
+                        </h5>
+                        
+                        <div class="space-y-3 text-xs sm:text-sm">
+                            <div>
+                                <strong class="text-teal-300 block mb-1">1. ADDU'A DA ZIKIRI (Kafin Fara Aiki/Karatu)</strong>
+                                <ul id="remedy-addua" class="list-disc list-inside space-y-1 text-teal-200/90 pl-1"></ul>
+                            </div>
+
+                            <div class="border-t border-teal-800/60 pt-3">
+                                <strong class="text-teal-300 block mb-1">2. RUBUTU (Domin Wanke Nauyin Jiki da Kaifin Basira)</strong>
+                                <ul id="remedy-rubutu" class="list-disc list-inside space-y-1 text-teal-200/90 pl-1"></ul>
+                            </div>
+
+                            <div class="border-t border-teal-800/60 pt-3">
+                                <strong class="text-teal-300 block mb-1">3. HAYAKI DA TSARKAKE DAKI (Fumigation)</strong>
+                                <ul id="remedy-hayaki" class="list-disc list-inside space-y-1 text-teal-200/90 pl-1"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-teal-600/80 py-6 border-t border-teal-900/60 mt-10">
+        <p><span data-i18n="s44">© 2026 Manhajar Ramli. Kiredit 3 ake cirewa ga kowace tambaya. Fassarar AI jagora ce, ba fatawa ba ce, kuma ba ta tabbatar da abin da zai faru nan gaba.</span></p>
+    </footer>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // PWA Installation Deferred Prompt Holder
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function installAppDirectly() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showNotification("Munasaba! An fara shigar da Manhajar Ramli a wayarka.", false);
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                showNotification(t('pwa_help'), false);
+            }
+        }
+
+        // Database of 16 Figures with Hausa Geomancy Traditional Names
+        // Sunayen taurari da alamominsu: daga littafin «الفلك المشحون في علم الرمل المصون» (layi na sama = na farko)
+        const figuresDB = {
+            "1121": { name: "Kausaj", arabic: "كوسج", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "1222": { name: "Dahik", arabic: "ضاحك", title: "Dariya & Sa'a", nature: "Dariya, sa'a mai kyau, farin ciki da samun albarka." },
+            "2111": { name: "Rāyat Farah", arabic: "راية فرح", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "2212": { name: "Bayad", arabic: "بياض", title: "Farin Ciki & Tsarki", nature: "Farin ciki, tsarki, aminci, da samun kwanciyar hankali." },
+            "1111": { name: "Ɗariƙ", arabic: "طريق", title: "Hanya & Sauƙi", nature: "Buɗewar hanya cikin sauri, sauƙaƙewar al'amari da tafiya." },
+            "1212": { name: "Ƙabd Khārij", arabic: "قبض خارج", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "2122": { name: "Humra", arabic: "حمرة", title: "Ja / Zafi", nature: "Zafi, fada ko gaggawa. Ana buƙatar natsuwa wajen yanke shawara." },
+            "2221": { name: "Inkis", arabic: "إنكيس", title: "Nauyi & Cikas", nature: "Duhu, nauyi, jinkiri ko cikas na ruhi/jiki da ke buƙatar gyara." },
+            "1122": { name: "Nasr Khārij", arabic: "نصر خارج", title: "Nasarar Waje", nature: "Nasarar waje, sakamako daga nesa, fita daga ƙuntatawa." },
+            "1221": { name: "Shaƙƙaf", arabic: "الشقاف", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "2112": { name: "Ijtimā'", arabic: "اجتماع", title: "Tarayyayar Tunani", nature: "Haɗuwa, rubutawa, yarjejeniya da gano dabarun aiki." },
+            "2211": { name: "Nasr Dākhil", arabic: "نصر داخل", title: "Nasarar Ciki", nature: "Nasarar ciki, samun alheri a kusa, dukiya da shigar alheri." },
+            "1112": { name: "Rāyat al-Huzn", arabic: "راية الحزن", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "1211": { name: "Naƙiyyul Khadd", arabic: "نقي الخد", title: "—", nature: "Ma'anar wannan tauraro ba a rubuta ta a nan ba tukuna. Yi amfani da fassarar AI (Gemini) don cikakken bayani." },
+            "2121": { name: "Ƙabd Dākhil", arabic: "قبض داخل", title: "Karɓar Dukiya", nature: "Karɓar dukiya ko riba a hannu, samun abin da ake nema." },
+            "2222": { name: "Jamā'a", arabic: "جماعة", title: "Haɗuwar Mutane", nature: "Haɗuwar al'umma, tarayya, farin ciki tare da dangi ko abokai." }
+        };
+
+        const houseTitles = [
+            "Gida 1 - Gidan Kai da Halin da Kake Ciki",
+            "Gida 2 - Gidan Ƙarfi, Kuzari da Riba",
+            "Gida 3 - Gidan Karatu, 'Yan Uwa da Ziyara",
+            "Gida 4 - Gidan Muhalli, Uba da Ƙarshen Al'amari",
+            "Gida 5 - Gidan 'Ya'ya, Sha'awa da Rabe-raben Hankali",
+            "Gida 6 - Gidan Cututtuka, Asiri, Ruhi da Cikas",
+            "Gida 7 - Gidan Aure, Fuskantar Juna da Abokan Zama",
+            "Gida 8 - Gidan Tsoro, Mutuwa da Gushewar Ƙarfi",
+            "Gida 9 - Gidan Tafiya, Ilimi mai Zurfi da Addini",
+            "Gida 10 - Gidan Aiki, Mukami da Himma",
+            "Gida 11 - Gidan Fata, Burika da Abokan Taimako",
+            "Gida 12 - Gidan Ɓoyayyen Makiyi da Ɗaurin Kai",
+            "Gida 13 - Gidan Wurare, Shimfiɗa da Yanayin Zama",
+            "Gida 14 - Gidan Fitar Al'amari da Sakamako",
+            "Gida 15 - Mizanin Ƙasa (Alƙali / Judge)",
+            "Gida 16 - Mizan / Sultan (Hukuncin Ƙarshe)"
+        ];
+
+        // State for 4 Mothers (M1, M2, M3, M4)
+        let mothers = {
+            m1: [1, 1, 2, 2],
+            m2: [1, 2, 1, 2],
+            m3: [1, 2, 2, 1],
+            m4: [1, 1, 2, 1]
+        };
+
+        let currentSpread = null;
+        let loggedInUser = null;
+
+        // ====== Harsuna uku: Hausa / English / العربية ======
+        const T = {"s0": {"ha": "Shiga", "en": "Sign in", "ar": "دخول"}, "s1": {"ha": "Ilimin Ramli da fassarar AI", "en": "Raml (geomancy) with AI interpretation", "ar": "علم الرمل مع التفسير بالذكاء الاصطناعي"}, "s2": {"ha": "Suna", "en": "Name", "ar": "الاسم"}, "s3": {"ha": "Imel", "en": "Email", "ar": "البريد الإلكتروني"}, "s4": {"ha": "Kalmar sirri (aƙalla haruffa 6)", "en": "Password (at least 6 characters)", "ar": "كلمة المرور (6 أحرف على الأقل)"}, "s5": {"ha": "Ba ka da asusu? Yi rajista", "en": "No account? Sign up", "ar": "ليس لديك حساب؟ أنشئ حسابًا"}, "s6": {"ha": "Sayi kiredit", "en": "Buy credits", "ar": "شراء أرصدة"}, "s7": {"ha": "Kiredit", "en": "Credits", "ar": "يُخصم"}, "s8": {"ha": "ake cirewa ga kowace tambaya. Kana da:", "en": "are deducted for each question. You have:", "ar": "أرصدة عن كل سؤال. لديك:"}, "s9": {"ha": "kiredit.", "en": "credits.", "ar": "رصيدًا."}, "s10": {"ha": "Kiredit ba ya ƙarewa a lokaci, kuma abin da ya rage yana nan idan ka sake sayen. Sayen yana wucewa ta Paystack.", "en": "Credits never expire, and any balance stays when you buy again. Payments go through Paystack.", "ar": "لا تنتهي صلاحية الأرصدة، ويبقى ما تبقى منها عند الشراء مجددًا. يتم الدفع عبر Paystack."}, "s11": {"ha": "Zauren Bincike na Ilimin Ramli", "en": "Raml Research Hall", "ar": "مجلس بحث علم الرمل"}, "s12": {"ha": "Malamin Zaure - Premium Geomancy Platform", "en": "Premium Geomancy Platform", "ar": "منصة الرمل المتميّزة"}, "s13": {"ha": "INSTALL APP (APK / PWA)", "en": "INSTALL APP", "ar": "تثبيت التطبيق"}, "s14": {"ha": "Kiredit:", "en": "Credits:", "ar": "الرصيد:"}, "s15": {"ha": "Gemini API Key naka (kyauta) don fassarar AI:", "en": "Your Gemini API key (free) for AI interpretation:", "ar": "مفتاح Gemini API الخاص بك (مجاني) للتفسير بالذكاء الاصطناعي:"}, "s16": {"ha": "Ɗauko key a Google AI Studio", "en": "Get a key in Google AI Studio", "ar": "احصل على المفتاح من Google AI Studio"}, "s17": {"ha": "Key ɗin yana a wayarka kawai, ba ma adana shi a wani wuri. Zuba Ramli da bayanin gidaje 16 suna aiki ba tare da shi ba; key ɗin don fassarar AI ne kawai.", "en": "The key stays only on your phone; we do not store it anywhere. Casting Raml works without it; the key is only for the AI interpretation.", "ar": "يبقى المفتاح على هاتفك فقط ولا نخزّنه في أي مكان. ضرب الرمل يعمل بدونه؛ المفتاح للتفسير بالذكاء الاصطناعي فقط."}, "s18": {"ha": "1. Sunanka, Manufa / Tambayarka & Ummahatu (M1 - M4)", "en": "1. Your name, question & the Mothers (M1 - M4)", "ar": "1. اسمك وسؤالك والأمهات (م1 - م4)"}, "s19": {"ha": "Sunanka (Ko wanda ake bincikawa):", "en": "Your name (or the person being consulted):", "ar": "اسمك (أو اسم المستفسَر عنه):"}, "s20": {"ha": "Tambaya ko Manufarka (Question):", "en": "Your question or purpose:", "ar": "سؤالك أو غايتك:"}, "s21": {"ha": "Latsa kowane layi don sauya tsakanin Digo 1 (●) ko Digo 2 (● ●):", "en": "Tap each line to switch between 1 dot (●) and 2 dots (● ●):", "ar": "اضغط على كل سطر للتبديل بين نقطة واحدة (●) ونقطتين (● ●):"}, "s22": {"ha": "M1", "en": "M1", "ar": "م1"}, "s23": {"ha": "M2", "en": "M2", "ar": "م2"}, "s24": {"ha": "M3", "en": "M3", "ar": "م3"}, "s25": {"ha": "M4", "en": "M4", "ar": "م4"}, "s26": {"ha": "Uwa ta 1", "en": "Mother 1", "ar": "الأم 1"}, "s27": {"ha": "Uwa ta 2", "en": "Mother 2", "ar": "الأم 2"}, "s28": {"ha": "Uwa ta 3", "en": "Mother 3", "ar": "الأم 3"}, "s29": {"ha": "Uwa ta 4", "en": "Mother 4", "ar": "الأم 4"}, "s30": {"ha": "ZUBA RAMLI (kiredit 3)", "en": "CAST RAML (3 credits)", "ar": "اضرب الرمل (3 أرصدة)"}, "s31": {"ha": "Bazuwa (Random Ummahatu)", "en": "Random Mothers", "ar": "أمهات عشوائية"}, "s32": {"ha": "Your Geomancy Spread", "en": "Your Geomancy Spread", "ar": "طالعك في علم الرمل"}, "s33": {"ha": "Houses 1 - 8 (Ummahatu & Banatu)", "en": "Houses 1 - 8 (Mothers & Daughters)", "ar": "البيوت 1 - 8 (الأمهات والبنات)"}, "s34": {"ha": "Houses 9 - 12 (Nawafi'u)", "en": "Houses 9 - 12 (Nieces)", "ar": "البيوت 9 - 12 (الحفيدات)"}, "s35": {"ha": "Shaidun Dama da Hagu (Witnesses 13 & 14)", "en": "Right & Left Witnesses (13 & 14)", "ar": "الشاهدان الأيمن والأيسر (13 و14)"}, "s36": {"ha": "Alƙali / Judge (House 15)", "en": "Judge (House 15)", "ar": "القاضي (البيت 15)"}, "s37": {"ha": "Mizan / Sultan (House 16)", "en": "Mizan / Reconciler (House 16)", "ar": "الميزان / المصلح (البيت 16)"}, "s38": {"ha": "Total Points (Adadin Digo):", "en": "Total points (number of dots):", "ar": "مجموع النقاط (عدد النقاط):"}, "s39": {"ha": "Gemini AI Malamin Zaure", "en": "Gemini AI Interpreter", "ar": "مفسّر Gemini AI"}, "s40": {"ha": "Yi amfani da Gemini AI domin zurfafa fassarar gidaje 16, Tahlili, da Waraka take.", "en": "Use Gemini AI to deepen the reading of the 16 houses, the analysis and the remedies.", "ar": "استخدم Gemini AI لتعميق تفسير البيوت الستة عشر والتحليل والعلاج."}, "s41": {"ha": "Nemawa Daga Gemini AI", "en": "Interpret with Gemini AI", "ar": "اطلب التفسير من Gemini AI"}, "s42": {"ha": "Gemini AI yana fassara zubin Ramli da fitar da magunguna da addu'a...", "en": "Gemini AI is interpreting the cast and preparing remedies and supplications...", "ar": "يقوم Gemini AI بتفسير الرمل وإعداد العلاج والأدعية..."}, "s43": {"ha": "FASSARAR ZAUREN BINCIKE NA ILIMIN RAMLI", "en": "RAML INTERPRETATION", "ar": "تفسير علم الرمل"}, "s44": {"ha": "© 2026 Manhajar Ramli. Kiredit 3 ake cirewa ga kowace tambaya. Fassarar AI jagora ce, ba fatawa ba ce, kuma ba ta tabbatar da abin da zai faru nan gaba.", "en": "© 2026 Manhajar Ramli. 3 credits are deducted per question. AI interpretation is guidance, not a religious ruling, and does not guarantee what will happen.", "ar": "© 2026 منهاج الرمل. يُخصم 3 أرصدة عن كل سؤال. التفسير بالذكاء الاصطناعي إرشاد وليس فتوى ولا يضمن ما سيحدث مستقبلاً."}, "s45": {"ha": "Kiredit 20 · tambayoyi 6", "en": "20 credits · 6 questions", "ar": "20 رصيدًا · 6 أسئلة"}, "s46": {"ha": "Kiredit 40 · tambayoyi 13", "en": "40 credits · 13 questions", "ar": "40 رصيدًا · 13 أسئلة"}, "s47": {"ha": "Kiredit 80 · tambayoyi 26", "en": "80 credits · 26 questions", "ar": "80 رصيدًا · 26 أسئلة"}, "s48": {"ha": "Kiredit 200 · tambayoyi 66", "en": "200 credits · 66 questions", "ar": "200 رصيدًا · 66 أسئلة"}, "s49": {"ha": "Kiredit 400 · tambayoyi 133", "en": "400 credits · 133 questions", "ar": "400 رصيدًا · 133 أسئلة"}, "p0": {"ha": "Rubuta sunanka", "en": "Enter your name", "ar": "اكتب اسمك"}, "p1": {"ha": "Misali: Dalilin da ya sa da zarar dare ya yi nake jin kasala da nauyin jiki wajen karatu?", "en": "Example: Why do I feel sluggish and heavy at night when studying?", "ar": "مثال: لماذا أشعر بالكسل وثقل الجسم ليلاً عند الدراسة؟"}, "login": {"ha": "Shiga", "en": "Sign in", "ar": "دخول"}, "register": {"ha": "Yi rajista", "en": "Sign up", "ar": "إنشاء حساب"}, "switch_to_reg": {"ha": "Ba ka da asusu? Yi rajista", "en": "No account? Sign up", "ar": "ليس لديك حساب؟ أنشئ حسابًا"}, "switch_to_login": {"ha": "Kana da asusu? Shiga", "en": "Have an account? Sign in", "ar": "لديك حساب؟ سجّل الدخول"}, "a_conn": {"ha": "Ba a iya haɗawa da uwar garke ba. Duba intanet.", "en": "Could not reach the server. Check your internet.", "ar": "تعذّر الاتصال بالخادم. تحقق من الإنترنت."}, "a_fill": {"ha": "Cika imel da kalmar sirri.", "en": "Fill in your email and password.", "ar": "املأ البريد الإلكتروني وكلمة المرور."}, "a_pw6": {"ha": "Kalmar sirri ta zama aƙalla haruffa 6.", "en": "The password must be at least 6 characters.", "ar": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل."}, "a_confirm": {"ha": "Duba imel ɗinka don tabbatar da asusu, sannan ka shiga.", "en": "Check your email to confirm your account, then sign in.", "ar": "تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول."}, "n_welcome": {"ha": "Barka da zuwa! An ba ka kiredit 12 kyauta (tambayoyi 4).", "en": "Welcome! You received 12 free credits (4 questions).", "ar": "مرحبًا بك! حصلت على 12 رصيدًا مجانًا (4 أسئلة)."}, "n_payok": {"ha": "An tabbatar da biyan kuɗi. An ƙara maka kiredit.", "en": "Payment confirmed. Credits were added.", "ar": "تم تأكيد الدفع وإضافة الأرصدة."}, "n_payfail": {"ha": "Ba a tabbatar da biyan ba: ", "en": "Payment not confirmed: ", "ar": "لم يتم تأكيد الدفع: "}, "n_low": {"ha": "Kiredit ɗinka bai isa ba (ana buƙatar {n}). Sayi kiredit don ci gaba.", "en": "Not enough credits ({n} needed). Buy credits to continue.", "ar": "رصيدك غير كافٍ (يلزم {n}). اشترِ أرصدة للمتابعة."}, "n_err": {"ha": "Kuskure: ", "en": "Error: ", "ar": "خطأ: "}, "n_low2": {"ha": "Kiredit ɗinka bai isa ba. Sayi kiredit don ci gaba.", "en": "Not enough credits. Buy credits to continue.", "ar": "رصيدك غير كافٍ. اشترِ أرصدة للمتابعة."}, "n_spent": {"ha": "An cire kiredit {n}. Ya rage maka: {m}.", "en": "{n} credits deducted. You have {m} left.", "ar": "تم خصم {n} أرصدة. المتبقي لديك: {m}."}, "n_nokey": {"ha": "Kana buƙatar Gemini API Key naka (kyauta). Ka ɗauko shi daga maɓallin shuɗi da ke sama, sannan ka liƙa a akwatin.", "en": "You need your own Gemini API key (free). Get it with the blue button above, then paste it in the box.", "ar": "تحتاج إلى مفتاح Gemini API الخاص بك (مجاني). احصل عليه بالزر الأزرق أعلاه ثم الصقه في الحقل."}, "n_aiok": {"ha": "An samu fassara daga Gemini AI!", "en": "Interpretation received from Gemini AI!", "ar": "تم الحصول على التفسير من Gemini AI!"}, "n_aifail": {"ha": "Ba a samu fassara ba. Tabbatar da Gemini API Key ɗinka daidai ne, ko ka jira ɗan lokaci ka sake gwadawa.", "en": "No interpretation received. Check that your Gemini API key is correct, or wait a moment and try again.", "ar": "لم يتم الحصول على تفسير. تأكد من صحة مفتاح Gemini API أو انتظر قليلاً ثم أعد المحاولة."}, "w_right": {"ha": "Shaidan Dama", "en": "Right Witness", "ar": "الشاهد الأيمن"}, "w_left": {"ha": "Shaidan Hagu", "en": "Left Witness", "ar": "الشاهد الأيسر"}, "judge": {"ha": "Alƙali", "en": "Judge", "ar": "القاضي"}, "mizan": {"ha": "Mizan/Sultan", "en": "Mizan/Reconciler", "ar": "الميزان/المصلح"}, "hist_title": {"ha": "Tarihin Bincike", "en": "Reading History", "ar": "سجل القراءات"}, "hist_btn": {"ha": "Tarihin bincike", "en": "Reading history", "ar": "سجل القراءات"}, "h_loading": {"ha": "Ana ɗauko...", "en": "Loading...", "ar": "جارٍ التحميل..."}, "h_empty": {"ha": "Babu wani bincike da aka adana tukuna.", "en": "No saved readings yet.", "ar": "لا توجد قراءات محفوظة بعد."}, "h_noq": {"ha": "(babu tambaya)", "en": "(no question)", "ar": "(بلا سؤال)"}, "h_del": {"ha": "A share wannan bincike?", "en": "Delete this reading?", "ar": "هل تريد حذف هذه القراءة؟"}, "copy_btn": {"ha": "Kwafi sakamako", "en": "Copy result", "ar": "نسخ النتيجة"}, "share_btn": {"ha": "Tura ta WhatsApp", "en": "Send via WhatsApp", "ar": "إرسال عبر WhatsApp"}, "copied": {"ha": "An kwafi sakamakon! Za ka iya liƙa shi ka tura wa wani.", "en": "Result copied! You can paste and send it to someone.", "ar": "تم نسخ النتيجة! يمكنك لصقها وإرسالها لأحد."}, "copy_fail": {"ha": "Ba a iya kwafa ba. Ka riƙe rubutun ka kwafa da hannu.", "en": "Could not copy. Long-press the text and copy it manually.", "ar": "تعذّر النسخ. اضغط مطولاً على النص وانسخه يدويًا."}, "pwa_ok": {"ha": "Munasaba! An fara shigar da Manhajar Ramli a wayarka.", "en": "Congratulations! Installing the Raml app on your phone.", "ar": "مبروك! جارٍ تثبيت تطبيق الرمل على هاتفك."}, "pwa_help": {"ha": "Zaka iya shigar da manhajar ta hanyar danna 'Add to Home Screen' a kan browser dinka!", "en": "You can install the app by tapping 'Add to Home Screen' in your browser!", "ar": "يمكنك تثبيت التطبيق بالضغط على 'Add to Home Screen' في المتصفح!"}, "shared_by": {"ha": "Manhajar Ramli", "en": "Manhajar Ramli", "ar": "منهاج الرمل"}};
+        let LANG = (function () { try { return localStorage.getItem('lang') || 'ha'; } catch (e) { return 'ha'; } })();
+        const t = (k, v) => { let x = (T[k] && (T[k][LANG] || T[k].ha)) || k; if (v) Object.keys(v).forEach(n => { x = x.replace('{' + n + '}', v[n]); }); return x; };
+        const langName = () => ({ ha: 'HAUSA', en: 'ENGLISH', ar: 'ARABIC (العربية)' }[LANG]);
+        const FIG_LAT = { "1121": "Kawsaj", "1222": "Dahik", "2111": "Rayat Farah", "2212": "Bayad", "1111": "Tariq", "1212": "Qabd Kharij", "2122": "Humra", "2221": "Inkis", "1122": "Nasr Kharij", "1221": "Shaqqaf", "2112": "Ijtima'", "2211": "Nasr Dakhil", "1112": "Rayat al-Huzn", "1211": "Naqi al-Khadd", "2121": "Qabd Dakhil", "2222": "Jama'a" };
+        function figLabel(info, key) {
+            if (LANG === 'ar') return [info.arabic, ''];
+            return [LANG === 'en' ? (FIG_LAT[key] || info.name) : info.name, info.arabic];
+        }
+        function applyI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = t(e.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
+            document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = t(e.dataset.i18nTitle); });
+            document.querySelectorAll('.lang-sel').forEach(e => { e.value = LANG; });
+            refreshAuthTexts();
+        }
+        function refreshAuthTexts() {
+            const reg = (typeof authMode !== 'undefined') && authMode === 'register';
+            const at = document.getElementById('auth-title'), asb = document.getElementById('auth-submit'), asw = document.getElementById('auth-switch');
+            if (at) at.innerText = t(reg ? 'register' : 'login');
+            if (asb) asb.innerText = t(reg ? 'register' : 'login');
+            if (asw) asw.innerText = t(reg ? 'switch_to_login' : 'switch_to_reg');
+        }
+        function setLang(l) {
+            LANG = l;
+            try { localStorage.setItem('lang', l); } catch (e) {}
+            document.documentElement.lang = l;
+            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+            applyI18n();
+            if (typeof currentSpread !== 'undefined' && currentSpread) buildCards(currentSpread.all16);
+        }
+
+        // ====== Supabase & Paystack (iri ɗaya da manhajar da ke aiki) ======
+        const SUPABASE_URL = 'https://vpssdlkzymucwzvhudps.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwc3NkbGt6eW11Y3d6dmh1ZHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNzU2MjgsImV4cCI6MjEwODc1MTYyOH0.dkPjMVMAvvBVpOk1OtNtsE1Xgh_n-RGpp0ZI2pi_W_8';
+        const FN_URL = SUPABASE_URL + '/functions/v1/Paystack';
+        let sb = null, credits = 0, authMode = 'login';
+        const COST = 3;
+        try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { console.error(e); }
+        const $ = id => document.getElementById(id);
+
+        function toggleAuthForms() {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            const reg = authMode === 'register';
+            $('a-name-wrap').classList.toggle('hidden', !reg);
+            refreshAuthTexts();
+            $('auth-msg').innerText = '';
+        }
+
+        async function callFn(body) {
+            const { data: { session } } = await sb.auth.getSession();
+            const r = await fetch(FN_URL, { method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
+                body: JSON.stringify(body) });
+            const j = await r.json();
+            if (!r.ok) throw new Error(j.error || 'Kuskure');
+            return j;
+        }
+
+        async function handleAuth() {
+            if (!sb) { $('auth-msg').innerText = t('a_conn'); return; }
+            const email = $('a-email').value.trim(), password = $('a-pass').value, name = $('a-name').value.trim();
+            $('auth-msg').innerText = '';
+            if (!email || !password) { $('auth-msg').innerText = t('a_fill'); return; }
+            if (authMode === 'register' && password.length < 6) { $('auth-msg').innerText = t('a_pw6'); return; }
+            const res = authMode === 'register'
+                ? await sb.auth.signUp({ email, password, options: { data: { name } } })
+                : await sb.auth.signInWithPassword({ email, password });
+            if (res.error) { $('auth-msg').innerText = res.error.message; return; }
+            if (authMode === 'register' && !res.data.session) { $('auth-msg').innerText = t('a_confirm'); return; }
+            const justRegistered = authMode === 'register';
+            await checkAccess();
+            if (justRegistered) showNotification(t('n_welcome'), false);
+        }
+
+        async function checkAccess() {
+            if (!sb) return;
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) {
+                loggedInUser = null; credits = 0; setCredits(0);
+                $('auth-modal').classList.remove('hidden'); $('pay-modal').classList.add('hidden');
+                $('user-profile-badge').classList.add('hidden');
+                return;
+            }
+            const u = session.user;
+            loggedInUser = { id: u.id, email: u.email, name: (u.user_metadata && u.user_metadata.name) || u.email.split('@')[0] };
+            $('auth-modal').classList.add('hidden');
+            $('user-profile-badge').classList.remove('hidden');
+            $('header-user-name').innerText = loggedInUser.name;
+            const q = new URLSearchParams(location.search);
+            const ref = q.get('reference') || q.get('trxref');
+            if (ref) {
+                try { await callFn({ action: 'verify', reference: ref }); showNotification(t('n_payok'), false); }
+                catch (e) { showNotification(t('n_payfail') + e.message, true); }
+                history.replaceState({}, '', location.pathname);
+            }
+            await refreshCredits();
+        }
+
+        function setCredits(n) {
+            credits = n;
+            $('credit-display').innerText = n;
+            $('modal-credits').innerText = n;
+        }
+
+        async function refreshCredits() {
+            if (!sb || !loggedInUser) return;
+            const { data } = await sb.from('profiles').select('credits').eq('id', loggedInUser.id).maybeSingle();
+            setCredits((data && data.credits) || 0);
+        }
+
+        function openPay() { if (!loggedInUser) { $('auth-modal').classList.remove('hidden'); return; } refreshCredits(); $('pay-msg').innerText = ''; $('pay-modal').classList.remove('hidden'); }
+        function closePay() { $('pay-modal').classList.add('hidden'); }
+
+        async function startPayment(amountNaira) {
+            $('pay-msg').innerText = '';
+            try {
+                const j = await callFn({ action: 'init', plan: 'credits', amount_naira: amountNaira, callback_url: location.origin + location.pathname });
+                location.href = j.authorization_url;
+            } catch (e) { $('pay-msg').innerText = e.message; }
+        }
+
+        async function logoutUser() {
+            if (sb) await sb.auth.signOut();
+            checkAccess();
+        }
+
+        function showNotification(msg, isError = false) {
+            const toast = document.getElementById('app-toast');
+            toast.className = `transition-all duration-300 p-4 rounded-xl border text-sm text-center font-medium shadow-xl ${
+                isError 
+                ? 'bg-rose-950/90 border-rose-500 text-rose-200' 
+                : 'bg-teal-900/90 border-teal-400 text-teal-100'
+            }`;
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            toast.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 6000);
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('custom-api-key');
+            const icon = document.getElementById('eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function renderMotherInputs() {
+            ['m1', 'm2', 'm3', 'm4'].forEach(mKey => {
+                const container = document.getElementById(`${mKey}-inputs`);
+                if (!container) return;
+                container.innerHTML = '';
+
+                mothers[mKey].forEach((val, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'w-full py-3 rounded-lg border text-lg leading-none tracking-widest transition active:scale-95 '
+                        + (val === 2 ? 'bg-teal-700/50 border-teal-400 text-white' : 'bg-teal-900/40 border-teal-800/60 text-teal-100');
+                    btn.innerText = val === 1 ? '●' : '● ●';
+                    btn.onclick = () => updateDot(mKey, idx, val === 1 ? 2 : 1);
+                    container.appendChild(btn);
+                });
+            });
+        }
+
+        function updateDot(mKey, idx, value) {
+            mothers[mKey][idx] = value;
+            renderMotherInputs();
+        }
+
+        function randomizeMothers() {
+            ['m1', 'm2', 'm3', 'm4'].forEach(mKey => {
+                mothers[mKey] = mothers[mKey].map(() => (Math.random() > 0.5 ? 2 : 1));
+            });
+            renderMotherInputs();
+        }
+
+        function addFigures(figA, figB) {
+            return figA.map((val, idx) => {
+                const sum = val + figB[idx];
+                return sum % 2 === 0 ? 2 : 1;
+            });
+        }
+
+        function createFigureCard(figArray, houseNum, labelOverride = "") {
+            const card = document.createElement('div');
+            card.setAttribute('dir', 'ltr');
+            card.className = "bg-teal-950/80 border border-teal-700/60 rounded-xl p-2 sm:p-3 flex flex-col items-center justify-between shadow-md hover:border-teal-400 transition";
+            
+            const key = figArray.join('');
+            const info = figuresDB[key] || { name: "Tuta", arabic: "الرمز" };
+
+            let dotsHtml = '<div class="flex flex-col gap-1 my-1 sm:my-2 items-center">';
+            figArray.forEach(val => {
+                if (val === 1) {
+                    dotsHtml += '<div class="w-2.5 h-2.5 rounded-full bg-teal-300 shadow-sm"></div>';
+                } else {
+                    dotsHtml += '<div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-teal-300 shadow-sm"></div><div class="w-2.5 h-2.5 rounded-full bg-teal-300 shadow-sm"></div></div>';
+                }
+            });
+            dotsHtml += '</div>';
+
+            const fl = figLabel(info, key);
+            const label = labelOverride ? labelOverride : `H${houseNum}`;
+
+            card.innerHTML = `
+                <span class="text-[10px] font-bold text-teal-400 uppercase tracking-tight">${label}</span>
+                ${dotsHtml}
+                <span class="text-xs font-bold text-teal-100 mt-1 text-center">${fl[0]}</span>
+                ${fl[1] ? `<span class="text-[10px] text-teal-300/70 arabic-font">${fl[1]}</span>` : ''}
+            `;
+
+            return card;
+        }
+
+        async function calculateGeomancy() {
+            if (!loggedInUser) { $('auth-modal').classList.remove('hidden'); return; }
+            if (credits < COST) { showNotification(t('n_low', { n: COST }), true); openPay(); return; }
+            const { data, error } = await sb.rpc('spend_credits');
+            if (error) { showNotification(t('n_err') + error.message, true); return; }
+            if (data === null || typeof data === 'undefined') { await refreshCredits(); showNotification(t('n_low2'), true); openPay(); return; }
+            setCredits(data);
+
+            const userName = document.getElementById('user-name').value.trim() || "Bawan Allah";
+            const questionInput = document.getElementById('user-question').value.trim();
+            const question = questionInput ? questionInput : "Dalilin kasala, nauyin jiki ko cikas a rayuwa";
+
+            // 1. Ummahatu (M1 to M4)
+            const M1 = mothers.m1;
+            const M2 = mothers.m2;
+            const M3 = mothers.m3;
+            const M4 = mothers.m4;
+
+            // 2. Banatu (M5 to M8)
+            const D1 = [M1[0], M2[0], M3[0], M4[0]];
+            const D2 = [M1[1], M2[1], M3[1], M4[1]];
+            const D3 = [M1[2], M2[2], M3[2], M4[2]];
+            const D4 = [M1[3], M2[3], M3[3], M4[3]];
+
+            // 3. Nawafi'u / Nieces (H9 to H12)
+            const N1 = addFigures(M1, M2);
+            const N2 = addFigures(M3, M4);
+            const N3 = addFigures(D1, D2);
+            const N4 = addFigures(D3, D4);
+
+            // 4. Shaidu / Witnesses (H13 & H14)
+            const W1 = addFigures(N1, N2);
+            const W2 = addFigures(N3, N4);
+
+            // 5. Alƙali / Judge (H15)
+            const Judge = addFigures(W1, W2);
+
+            // 6. Sultan / Reconciler (H16)
+            const Sultan = addFigures(Judge, M1);
+
+            // Total 16 Houses array ordered 1 to 16
+            const all16 = [M1, M2, M3, M4, D1, D2, D3, D4, N1, N2, N3, N4, W1, W2, Judge, Sultan];
+            currentSpread = { userName, question, all16 };
+
+            renderSpread(all16, userName, question);
+            showNotification(t('n_spent', { n: COST, m: credits }), false);
+        }
+
+        function buildCards(figures) {
+            // Render Row 1: Houses 1 to 8
+            const row1 = document.getElementById('row-houses-1-8');
+            row1.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                row1.appendChild(createFigureCard(figures[i], i + 1));
+            }
+
+            // Render Row 2: Houses 9 to 12
+            const row2 = document.getElementById('row-houses-9-12');
+            row2.innerHTML = '';
+            for (let i = 8; i < 12; i++) {
+                row2.appendChild(createFigureCard(figures[i], i + 1));
+            }
+
+            // Render Row 3: Witnesses 13 & 14
+            const row3 = document.getElementById('row-witnesses');
+            row3.innerHTML = '';
+            row3.appendChild(createFigureCard(figures[12], 13, t('w_right')));
+            row3.appendChild(createFigureCard(figures[13], 14, t('w_left')));
+
+            // Render Row 4: Judge (House 15)
+            const row4 = document.getElementById('row-judge');
+            row4.innerHTML = '';
+            row4.appendChild(createFigureCard(figures[14], 15, t('judge')));
+
+            // Render Row 5: Sultan (House 16)
+            const row5 = document.getElementById('row-reconciler');
+            row5.innerHTML = '';
+            row5.appendChild(createFigureCard(figures[15], 16, t('mizan')));
+
+        }
+
+        function renderSpread(figures, userName, question) {
+            document.getElementById('spread-section').classList.remove('hidden');
+            document.getElementById('display-question').innerText = `"${question}"`;
+            
+            const now = new Date();
+            document.getElementById('display-date').innerText = now.toLocaleString(LANG === 'ar' ? 'ar' : LANG === 'en' ? 'en-GB' : 'ha-NG', { dateStyle: 'full', timeStyle: 'short' });
+
+            buildCards(figures);
+
+            // Total Dots Points
+            let totalPoints = 0;
+            figures.forEach(fig => {
+                fig.forEach(dotVal => totalPoints += dotVal);
+            });
+            document.getElementById('total-points-val').innerText = totalPoints;
+
+            // Babu rubutun fassara na jabu: ana nuna fassara ne kawai idan Gemini AI ya amsa
+            document.getElementById('reading-section').classList.add('hidden');
+            document.getElementById('ai-markdown').innerHTML = '';
+            document.getElementById('houses-breakdown-list').innerHTML = '';
+            document.getElementById('malamin-intro-text').innerText = '';
+            document.getElementById('tahlili-text').innerHTML = '';
+            ['remedy-addua', 'remedy-rubutu', 'remedy-hayaki'].forEach(id => { document.getElementById(id).innerHTML = ''; });
+
+            document.getElementById('spread-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Gemini AI: salon fassara iri ɗaya da manhajar da ke aiki (rubutu mai sassa 4)
+        function formatMarkdownDark(text) {
+            const esc = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return esc
+                .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-teal-300 mt-4 mb-2">$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-amber-300 border-b border-teal-700 pb-1 mt-5 mb-2">$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-amber-300 mt-6 mb-3">$1</h1>')
+                .replace(/^\s*[\*\-] (.*$)/gim, '<li class="ml-4 list-disc text-sm my-1">$1</li>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-300">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '<br/><br/>');
+        }
+
+        async function generateGeminiInterpretation() {
+            if (!currentSpread) return;
+            if (!loggedInUser) { $('auth-modal').classList.remove('hidden'); return; }
+            const userApiKey = document.getElementById('custom-api-key').value.trim();
+            if (!userApiKey) {
+                showNotification(t('n_nokey'), true);
+                document.getElementById('custom-api-key').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('custom-api-key').focus();
+                return;
+            }
+
+            const loadingEl = document.getElementById('gemini-loading');
+            const btnEl = document.getElementById('btn-gemini-interpret');
+            loadingEl.classList.remove('hidden');
+            btnEl.disabled = true;
+
+            const { userName, question, all16 } = currentSpread;
+            let totalPoints = 0;
+            all16.forEach(f => f.forEach(v => totalPoints += v));
+
+            const systemPrompt = `Kai gwanin masanin ilmin Ramli ne da Maganganun Musulunci (Tibb An-Nabawi & Malaman Zaure).
+Yi amfani da sunayen taurarin ramli 16 kamar yadda littafin «الفلك المشحون» ya rubuta su, wajen fassara:
+${Object.values(figuresDB).map(f => f.name + ' (' + f.arabic + ')').join(', ')}
+
+Duk amsarka, har da taken sassan, ta kasance a cikin harshen ${langName()} kawai.
+Raba amsar taka gida 4:
+1. **Amsar Tambaya (Direct Answer)**: Amsa karara akan tambayar mai nema (Malam/Aure/Matsala).
+2. **Binciken Gidaje 16 (Houses Analysis)**: Sharhi akan gidaje (Uwaye, Alkali Gida 15, Khatim Gida 16).
+3. **Matsalar da aka Gano (Identified Issue)**: Tsaiko, makiya, ko tsoro?
+4. **Magani daga Littattafan Musulunci**: Ka zayyana magani a nau'i 3 na gargajiyar Malaman Zaure:
+   - **Addu'a da Zikiri**: Surorin Alkur'ani ko Salatin Annabi.
+   - **Rubutun Sha**: Ayoyin da za a rubuta a wanke a sha.
+   - **Hayaki/Turare**: Turare ko itatuwan da za a yi hayaki dasu don tsari.`;
+
+            let spreadSummary = `Sunan mai tambaya: ${userName}\nTambayar Mai Tambaya: "${question}"\nTotal Nuqta (Points): ${totalPoints}\n\nTsarin Gidaje 16 da Taurarinsu:\n`;
+            all16.forEach((fig, idx) => {
+                const key = fig.join('');
+                const info = figuresDB[key] || { name: 'Sura', arabic: '' };
+                spreadSummary += `Gida ${idx + 1} (${houseTitles[idx]}): ${info.name} (${info.arabic}) [${fig.join(',')}]\n`;
+            });
+
+            const payload = {
+                contents: [{ parts: [{ text: spreadSummary }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+
+            let resultText = null, delay = 1000;
+            for (let i = 0; i < 3 && !resultText; i++) {
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+                    }
+                } catch (e) { console.log(`Gemini retry ${i + 1}`); }
+                if (!resultText && i < 2) { await new Promise(res => setTimeout(res, delay)); delay *= 2; }
+            }
+
+            loadingEl.classList.add('hidden');
+            btnEl.disabled = false;
+
+            if (resultText) {
+                applyGeminiReading(resultText);
+                saveReading(resultText);
+                showNotification(t('n_aiok'), false);
+            } else {
+                showNotification(t('n_aifail'), true);
+            }
+        }
+
+        let lastResult = '';
+        function applyGeminiReading(markdownText) {
+            lastResult = markdownText;
+            document.getElementById('reading-section').classList.remove('hidden');
+            document.getElementById('malam-title').innerText = "Gemini AI";
+            document.getElementById('ai-badge').innerHTML = `<i class="fa-solid fa-robot text-purple-400"></i> Gemini AI Powered`;
+            document.getElementById('ai-markdown').innerHTML = formatMarkdownDark(markdownText);
+            document.getElementById('reading-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ====== Tarihin bincike (ana adanawa a Supabase) ======
+        let historyItems = [];
+        const escHtml = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+        async function saveReading(resultText) {
+            try {
+                if (!sb || !loggedInUser || !currentSpread) return;
+                await sb.from('readings').insert({
+                    user_id: loggedInUser.id, kind: 'ramli', question: currentSpread.question || '',
+                    mothers: { m1: mothers.m1, m2: mothers.m2, m3: mothers.m3, m4: mothers.m4, _name: currentSpread.userName },
+                    result: resultText
+                });
+            } catch (e) { console.warn('Ba a adana ba:', e); }
+        }
+
+        async function openHistory() {
+            if (!loggedInUser) { $('auth-modal').classList.remove('hidden'); return; }
+            $('history-modal').classList.remove('hidden');
+            $('history-list').innerHTML = '<p class="text-teal-300/70 py-4 text-center">' + t('h_loading') + '</p>';
+            const { data, error } = await sb.from('readings').select('*').order('created_at', { ascending: false }).limit(100);
+            if (error) { $('history-list').innerHTML = '<p class="text-rose-300 py-4">' + escHtml(error.message) + '</p>'; return; }
+            historyItems = data || [];
+            if (!historyItems.length) { $('history-list').innerHTML = '<p class="text-teal-300/70 py-4 text-center">' + t('h_empty') + '</p>'; return; }
+            const loc = LANG === 'ar' ? 'ar' : LANG === 'en' ? 'en-GB' : 'ha-NG';
+            $('history-list').innerHTML = historyItems.map((r, i) => `
+                <div class="border-b border-teal-800/60 py-2 flex items-start gap-2">
+                    <div class="flex-1 cursor-pointer" onclick="openReading(${i})">
+                        <div class="text-teal-400/80">${new Date(r.created_at).toLocaleString(loc)}</div>
+                        <div class="text-sm text-teal-100">${escHtml((r.question || '').slice(0, 90)) || t('h_noq')}</div>
+                    </div>
+                    <button onclick="deleteReading(${i})" class="text-rose-400 px-2"><i class="fa-solid fa-trash"></i></button>
+                </div>`).join('');
+        }
+        function closeHistory() { $('history-modal').classList.add('hidden'); }
+
+        function buildAll16() {
+            const M1 = mothers.m1, M2 = mothers.m2, M3 = mothers.m3, M4 = mothers.m4;
+            const D1 = [M1[0], M2[0], M3[0], M4[0]], D2 = [M1[1], M2[1], M3[1], M4[1]], D3 = [M1[2], M2[2], M3[2], M4[2]], D4 = [M1[3], M2[3], M3[3], M4[3]];
+            const N1 = addFigures(M1, M2), N2 = addFigures(M3, M4), N3 = addFigures(D1, D2), N4 = addFigures(D3, D4);
+            const W1 = addFigures(N1, N2), W2 = addFigures(N3, N4), Judge = addFigures(W1, W2), Sultan = addFigures(Judge, M1);
+            return [M1, M2, M3, M4, D1, D2, D3, D4, N1, N2, N3, N4, W1, W2, Judge, Sultan];
+        }
+
+        // Buɗe tsohon bincike: ba a cire kiredit ba
+        function openReading(i) {
+            const r = historyItems[i];
+            if (!r || !r.mothers) return;
+            closeHistory();
+            ['m1', 'm2', 'm3', 'm4'].forEach(k => { mothers[k] = [...r.mothers[k]]; });
+            renderMotherInputs();
+            const userName = r.mothers._name || '';
+            const question = r.question || '';
+            $('user-name').value = userName;
+            $('user-question').value = question;
+            const all16 = buildAll16();
+            currentSpread = { userName: userName || 'Bawan Allah', question: question || '-', all16 };
+            renderSpread(all16, currentSpread.userName, currentSpread.question);
+            applyGeminiReading(r.result || '');
+        }
+
+        async function deleteReading(i) {
+            const r = historyItems[i];
+            if (!r || !confirm(t('h_del'))) return;
+            const { error } = await sb.from('readings').delete().eq('id', r.id);
+            if (error) showNotification(t('n_err') + error.message, true); else openHistory();
+        }
+
+        // ====== Kwafi da tura sakamako ======
+        function buildShareText() {
+            const name = currentSpread ? currentSpread.userName : '';
+            const q = currentSpread ? currentSpread.question : '';
+            const body = String(lastResult || '').replace(/^\s*[\*\-] /gm, '• ').replace(/\*\*(.*?)\*\*/g, '*$1*').trim();
+            return `${name}\n"${q}"\n\n${body}\n\n— ${t('shared_by')}: ${location.origin}${location.pathname}`;
+        }
+        async function copyResult() {
+            const text = buildShareText();
+            try {
+                await navigator.clipboard.writeText(text);
+                showNotification(t('copied'), false);
+            } catch (e) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                    document.body.appendChild(ta); ta.select();
+                    const ok = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    showNotification(ok ? t('copied') : t('copy_fail'), !ok);
+                } catch (e2) { showNotification(t('copy_fail'), true); }
+            }
+        }
+        function shareResult() {
+            window.open('https://wa.me/?text=' + encodeURIComponent(buildShareText()), '_blank', 'noopener');
+        }
+
+        function generateMalaminZaureReading(figures, userName, question) {
+            document.getElementById('malam-title').innerText = "Malamin Zaure";
+            document.getElementById('ai-badge').innerHTML = `<i class="fa-solid fa-user-ninja text-amber-400"></i> Malamin Zaure`;
+
+            document.getElementById('malamin-intro-text').innerText = `Ya kai wannan bawan Allah ${userName}, mun kalli zubin ƙasar da aka shimfiɗa a kan tambayarka ta: "${question}". Ga bayanin yadda taurarin gidaje 16 suka bayyana asirin wannan matsala taka daki-daki:`;
+
+            const breakdownContainer = document.getElementById('houses-breakdown-list');
+            breakdownContainer.innerHTML = '';
+
+            figures.forEach((fig, idx) => {
+                const key = fig.join('');
+                const info = figuresDB[key] || { name: "Tuta", arabic: "الرمز", nature: "Bayani na nan tafe." };
+                const hTitle = houseTitles[idx];
+
+                const houseDiv = document.createElement('div');
+                houseDiv.className = "p-3 rounded-lg bg-teal-900/30 border border-teal-800/40";
+
+                let customDesc = getCustomHouseDescription(idx, info, userName);
+
+                houseDiv.innerHTML = `
+                    <p class="font-bold text-teal-300">
+                        <span class="text-amber-400">●</span> ${hTitle} (${info.name} - ${info.arabic}):
+                    </p>
+                    <p class="text-teal-100/90 mt-1 pl-4 leading-relaxed">${customDesc}</p>
+                `;
+                breakdownContainer.appendChild(houseDiv);
+            });
+
+            const judgeInfo = figuresDB[figures[14].join('')] || { name: "Alƙali" };
+            document.getElementById('tahlili-text').innerHTML = `
+                A takaice <strong>${userName}</strong>, binciken Ramli ya nuna cewa matsalar ko buƙatar da kake tambaya a kai tana da dangantaka ta kusa tsakanin zafin jiki/halin da ake ciki da kuma nauyin ruhi. Tauraro a Gida 6 da Hukuncin Alƙali (${judgeInfo.name}) sun tabbatar da cewa:
+                <br><br>
+                1. <strong>Matsalar Ruhi & Iska:</strong> Akwai bibiyar ruhi ko nauyi na iska mara kyau wanda ke saukar da kasala ko toshe basira idan aka natsu.
+                <br>
+                2. <strong>Matsalar Jiki:</strong> Akwai raunin lakoki, sanyi ko zazzabi mai sanyaya jini wanda ke cinye ƙarfin jiki idan an zauna domin wani muhimmin aiki.
+            `;
+
+            document.getElementById('remedy-addua').innerHTML = `
+                <li>Da zaran ka kusa zama karatu ko fara gudanar da bukatar, yi alwala sannan ka karanta <strong>Ayatul Kursiyyu (7)</strong>. A kafa ta ƙarshe, maimaita <em>"Wala ya'uduhu hifzuhuma wahuwal aliyyul azeem"</em> kafa 11.</li>
+                <li>Karanta wannan addu'ar Annabi (SAW) kafa 3: <em>«Allahumma inni a'uzu bika minal-hammi wal-hazani, wal-ajzi wal-kasali...»</em></li>
+                <li>Karanta sunan Allah: <strong>"YĀ FATTĀHU, YĀ 'ALĪM"</strong> kafa 100 domin buɗe ƙofofin fahimta da korar bacci ko kasala.</li>
+            `;
+
+            document.getElementById('remedy-rubutu').innerHTML = `
+                <li>A samu tawada mai kyau (ta zafaran da ruwan wardi), a rubuta: <strong>Suratul Fatiha (7)</strong> da <strong>Suratul Inshirah (7)</strong>.</li>
+                <li>Maimaita ayar: <em>«Rabbi zidni 'ilman, warzuqni fahman»</em> kafa 21.</li>
+                <li>A wanke da ruwa mai kyau, a zuba ɗan garin habbatus sauda da zuma, a riƙa sha safe da dare don wanke sanyin jiki da wartsakar da ƙwakwalwa.</li>
+            `;
+
+            document.getElementById('remedy-hayaki').innerHTML = `
+                <li>A samu <strong>Al-kustul Hindi</strong> a haɗa da garin <strong>Habbatus Sauda</strong> da ɗan <strong>Tafarnuwa</strong> ko turaren <strong>Al-jawiy</strong>.</li>
+                <li>A riƙa sanya garwashi ana yin hayakin ɗakin da kake zama da daddare kafin ka fara karatu ko zama gudanar da aiki.</li>
+                <li>Wannan hayaki yana ƙorar duk wata iska mai saukar da kasala da nauyi.</li>
+            `;
+        }
+
+        function getCustomHouseDescription(houseIdx, figureInfo, userName) {
+            const name = figureInfo.name;
+            const nature = figureInfo.nature;
+
+            const descriptions = [
+                `Tauraron ${name} ya bayyana a matsayin kanka ${userName}. Yana nuna cewa kana da kyakkyawar aniya da sha'awar ci gaba, amma akwai ɗan damuwa ko nauyi na jiki da ke dabaibaye ka.`,
+                `${name} a wannan gida tana nuna ƙarfin kuzarinka da nasarar da kake so ka gina, sai dai akwai buƙatar sake tara ƙarfi don cin nasara.`,
+                `${name} a nan tana nuna karatunka ko abubuwan da kake burin koya. Tauraron ya nuna cewa karatun yana da haske da fa'ida, amma ana buƙatar addu'a da natsuwa.`,
+                `${name} tana nuna yanayin muhallinka da ƙarshen al'amari. Tana buƙatar adana sirri da gyara tsarin zama a muhalli.`,
+                `Tauraron ${name} ya nuna cewa hankalinka yana yawan rabuwa gida-gida. Kana buƙatar maida hankali wuri guda ba tare da fargaba ba.`,
+                `Wannan shine babban gidan cikas! Tauraron ${name} ya tabbatar da cewa akwai ɗan nauyi na ruhi ko ciwon sanyi mai sa jiki ya saki lokacin gudanar da buƙata.`,
+                `${name} a gidan fuskantar juna tana nuna cewa akwai buƙatar samun tsatsauran fahimta tsakaninka da abokan harka ko abokan zama.`,
+                `${name} tana nuna cewa akwai wani tsoro ko nauyi na ɓoye da ke fitar da kuzarinka yayin da ka zauna domin gudanar da manufa.`,
+                `${name} a gida na 9 tana nuna fannin ilimi mai zurfi ko tafiya. Al'amari ne mai daraja da albarka idan aka karya cikas na gida 6.`,
+                `${name} tauraro ne da ke nuna aiki da himma. Ya nuna a baya kana da ƙwarin gwiwa, sai dai a yanzu akwai buƙatar kakkabe kasala.`,
+                `${name} ya shiga gidan burinka! Wannan yana nufin burinka yana samun ɗan jinkiri ta hanyar rashin warware matsalolin jiki da na ruhi.`,
+                `${name} ta nuna cewa duk da cikas da ke jikinka, kana da ƙofa mai girma ta samun nasara idan har ka ɗauki matakan addu'a da magani.`,
+                `${name} ta nuna dakin da kake karatu ko shimfiɗarka tana buƙatar tsarkakewa da ƙamshi domin guje wa nauyin iska.`,
+                `${name} ta nuna cewa idan ka bi hanyar addu'a da neman magani, wannan kasala za ta yaye, haske da basira za su maye gurbin duhu.`,
+                `Alƙali (${name}) ya tabbatar da cewa biyan buƙatarka yana nan kusa, amma dole ne a raba jikinka da nauyin ruhi da raunin jiki.`,
+                `Mizan/Sultan (${name}) ya zartar da cewa: Kai mutum me albarka da za a yi alfahari da shi, sai dai ana buƙatar lazimtar addu'o'i da tsarkake jiki.`
+            ];
+
+            return descriptions[houseIdx] || `${name} (${nature}).`;
+        }
+
+        window.onload = function() {
+            setLang(LANG);
+            renderMotherInputs();
+            const keyEl = document.getElementById('custom-api-key');
+            try { keyEl.value = localStorage.getItem('gemini_api_key') || ''; } catch (e) {}
+            keyEl.addEventListener('input', () => { try { localStorage.setItem('gemini_api_key', keyEl.value.trim()); } catch (e) {} });
+            checkAccess();
+        };
+    </script>
+</body>
+</html>
